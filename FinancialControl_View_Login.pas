@@ -1,0 +1,121 @@
+unit FinancialControl_View_Login;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
+  FMX.Layouts, FMX.Controls.Presentation, FMX.Edit, FMX.StdCtrls, FMX.TabControl,
+  System.Actions, FMX.ActnList, uPermissions;
+
+type
+  TFrmLogin = class(TForm)
+    Layout2: TLayout;
+    img_login_logo: TImage;
+    Layout1: TLayout;
+    RoundRect1: TRoundRect;
+    edt_login_email: TEdit;
+    StyleBook1: TStyleBook;
+    Layout3: TLayout;
+    RoundRect2: TRoundRect;
+    edt_login_senha: TEdit;
+    Layout4: TLayout;
+    RoundRect3: TRoundRect;
+    Label1: TLabel;
+    TabControl1: TTabControl;
+    TabLogin: TTabItem;
+    TabConta: TTabItem;
+    Layout5: TLayout;
+    Layout6: TLayout;
+    RoundRect4: TRoundRect;
+    edt_cad_nome: TEdit;
+    Layout7: TLayout;
+    RoundRect5: TRoundRect;
+    edt_cad_senha: TEdit;
+    Layout8: TLayout;
+    rectContaProximo: TRoundRect;
+    Label2: TLabel;
+    Layout9: TLayout;
+    RoundRect7: TRoundRect;
+    edt_cad_email: TEdit;
+    TabFoto: TTabItem;
+    Layout10: TLayout;
+    circEditarFoto: TCircle;
+    Layout11: TLayout;
+    RoundRect8: TRoundRect;
+    Label3: TLabel;
+    TabEscolher: TTabItem;
+    Layout12: TLayout;
+    Label4: TLabel;
+    imgFotoCamera: TImage;
+    imgFotoGaleria: TImage;
+    Layout13: TLayout;
+    imgCriarContaVoltar: TImage;
+    Layout14: TLayout;
+    Image1: TImage;
+    Layout15: TLayout;
+    Layout16: TLayout;
+    lblLogin: TLabel;
+    lblCriarConta: TLabel;
+    Rectangle1: TRectangle;
+    ActionList1: TActionList;
+    actConta: TChangeTabAction;
+    actEscolher: TChangeTabAction;
+    actFoto: TChangeTabAction;
+    actLogin: TChangeTabAction;
+    Layout17: TLayout;
+    Layout18: TLayout;
+    lblLoginInicio: TLabel;
+    Label6: TLabel;
+    Rectangle2: TRectangle;
+    procedure lblCriarContaClick(Sender: TObject);
+    procedure lblLoginInicioClick(Sender: TObject);
+    procedure rectContaProximoClick(Sender: TObject);
+    procedure imgCriarContaVoltarClick(Sender: TObject);
+    procedure circEditarFotoClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+  private
+    { Private declarations }
+    Permssao : T99Permissions;
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmLogin: TFrmLogin;
+
+implementation
+
+{$R *.fmx}
+
+procedure TFrmLogin.circEditarFotoClick(Sender: TObject);
+begin
+  actEscolher.Execute;
+end;
+
+procedure TFrmLogin.FormCreate(Sender: TObject);
+begin
+  Permssao := T99Permissions.Create;
+end;
+
+procedure TFrmLogin.imgCriarContaVoltarClick(Sender: TObject);
+begin
+  actConta.Execute;
+end;
+
+procedure TFrmLogin.lblCriarContaClick(Sender: TObject);
+begin
+  actConta.Execute;
+end;
+
+procedure TFrmLogin.lblLoginInicioClick(Sender: TObject);
+begin
+  actLogin.Execute;
+end;
+
+procedure TFrmLogin.rectContaProximoClick(Sender: TObject);
+begin
+  actFoto.Execute;
+end;
+
+end.
