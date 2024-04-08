@@ -7,10 +7,6 @@ uses
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
   FMX.Layouts, FMX.Controls.Presentation, FMX.Edit, FMX.StdCtrls, FMX.TabControl,
   System.Actions, FMX.ActnList, uPermissions, FMX.MediaLibrary.Actions,
-  FinancialControl_View_Principal,
-  {$IFDEF ANDROID}
-  FMX.VirtualKeyboard, FMX.Platform,
-  {$ENDIF}
   FMX.StdActns;
 
 type
@@ -87,10 +83,9 @@ type
     procedure imgEscolherVoltarClick(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; var KeyChar: Char;
       Shift: TShiftState);
-    procedure RoundRect3Click(Sender: TObject);
   private
     { Private declarations }
-    Permissao : TTGPermissions;
+    Permissao : T99Permissions;
     procedure TrataErroCamera(Sender: TObject);
   public
     { Public declarations }
@@ -110,7 +105,7 @@ end;
 
 procedure TFrmLogin.FormCreate(Sender: TObject);
 begin
-  Permissao := TTGPermissions.Create;
+  Permissao := T99Permissions.Create;
 end;
 
 procedure TFrmLogin.FormDestroy(Sender: TObject);
@@ -194,15 +189,6 @@ end;
 procedure TFrmLogin.rectContaProximoClick(Sender: TObject);
 begin
   actFoto.Execute;
-end;
-
-procedure TFrmLogin.RoundRect3Click(Sender: TObject);
-begin
-  if not Assigned(FrmPrincipal) then
-  begin
-    FrmPrincipal := TFrmPrincipal.Create(nil);
-    FrmPrincipal.Show;
-  end;
 end;
 
 procedure TFrmLogin.TrataErroCamera(Sender: TObject);

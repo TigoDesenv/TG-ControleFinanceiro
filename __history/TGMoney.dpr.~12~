@@ -1,0 +1,20 @@
+program TGMoney;
+
+uses
+  System.StartUpCopy,
+  FMX.Forms,
+  FinancialControl_View_Login in 'FinancialControl_View_Login.pas' {FrmLogin},
+  uPermissions in 'uPermissions.pas',
+  FinancialControl_View_Principal in 'FinancialControl_View_Principal.pas' {FrmPrincipal},
+  UnitLancamentos in 'UnitLancamentos.pas' {FrmLancamentos};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.CreateForm(TFrmLogin, FrmLogin);
+  Application.CreateForm(TFrmPrincipal, FrmPrincipal);
+  Application.CreateForm(TFrmLancamentos, FrmLancamentos);
+  Application.Run;
+
+end.

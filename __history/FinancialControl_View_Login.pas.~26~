@@ -198,7 +198,7 @@ end;
 
 procedure TFrmLogin.RoundRect3Click(Sender: TObject);
 begin
-  if not Assigned(FrmPrincipal) then
+  if Assigned(FrmPrincipal) then
   begin
     FrmPrincipal := TFrmPrincipal.Create(nil);
     FrmPrincipal.Show;

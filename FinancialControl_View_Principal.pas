@@ -1,0 +1,281 @@
+unit FinancialControl_View_Principal;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
+  FMX.Layouts, FMX.Controls.Presentation, FMX.StdCtrls, FMX.ListView.Types,
+  FMX.ListView.Appearances, FMX.ListView.Adapters.Base, FMX.ListView,
+  FinancialControl_View_Lancamentos, FinancialControl_View_Categorias;
+
+type
+  TFrmPrincipal = class(TForm)
+    Layout1: TLayout;
+    img_menu: TImage;
+    Circle1: TCircle;
+    Image1: TImage;
+    Label1: TLabel;
+    Layout2: TLayout;
+    Label2: TLabel;
+    Label3: TLabel;
+    Layout3: TLayout;
+    Layout4: TLayout;
+    Layout5: TLayout;
+    Image2: TImage;
+    Label4: TLabel;
+    Label5: TLabel;
+    Layout6: TLayout;
+    Image3: TImage;
+    Label6: TLabel;
+    Label7: TLabel;
+    Rectangle1: TRectangle;
+    Image4: TImage;
+    Rectangle2: TRectangle;
+    Layout7: TLayout;
+    Label8: TLabel;
+    lblTodosLancamentos: TLabel;
+    lvLancamento: TListView;
+    imagemTest: TImage;
+    StyleBook1: TStyleBook;
+    procedure FormShow(Sender: TObject);
+    procedure Image4Click(Sender: TObject);
+    procedure lvLancamentoUpdateObjects(const Sender: TObject;
+      const AItem: TListViewItem);
+    procedure lvLancamentoItemClick(const Sender: TObject;
+      const AItem: TListViewItem);
+    procedure lvLancamentoItemClickEx(const Sender: TObject; ItemIndex: Integer;
+      const LocalClickPos: TPointF; const ItemObject: TListItemDrawable);
+    procedure lvLancamentoPaint(Sender: TObject; Canvas: TCanvas;
+      const ARect: TRectF);
+    procedure lblTodosLancamentosClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure img_menuClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    procedure AddLancamentos(id_lacamentos: Integer;
+      descricao, categoria: String; valor: Double;
+      DtLancamento: TDateTime;
+      foto: TStream);
+    procedure SetupLancamento(lv: TListView;
+      Item: TListViewItem);
+    procedure AddCategoria(listview: TListView; id_categoria, categoria: string;
+              foto: TStream);
+    procedure SetupCategoria(lv: TListView; Item: TListViewItem);
+  end;
+
+var
+  FrmPrincipal: TFrmPrincipal;
+
+implementation
+
+{$R *.fmx}
+
+procedure TFrmPrincipal.AddCategoria(listview: TListView; id_categoria,
+  categoria: string; foto: TStream);
+var
+  txt : TListItemText;
+  img : TListItemImage;
+  bmp : TBitmap;
+begin
+  with listview.Items.Add do
+  begin
+    TagString := id_categoria;
+
+    txt := TListItemText(Objects.FindDrawable('TxtCategoria'));
+    txt.Text := categoria;
+
+    // Icone...
+    img := TListItemImage(Objects.FindDrawable('ImgIcone'));
+
+    if foto <> nil then
+    begin
+      bmp := TBitmap.Create;
+      bmp.LoadFromStream(foto);
+
+      img.OwnsBitmap := true;
+      img.Bitmap := bmp;
+    end;
+  end;
+end;
+
+procedure TFrmPrincipal.AddLancamentos(id_lacamentos: Integer; descricao,
+  categoria: String; valor: Double; DtLancamento: TDateTime; Foto: TStream);
+var
+  Txt: TListItemText;
+  Img: TListItemImage;
+  bmp: TBitmap;
+begin
+  with lvLancamento.Items.Add do
+  begin
+    // Exemplo utilizando Variável
+    TagString := id_lacamentos.ToString;
+
+    Txt := TListItemText(Objects.FindDrawable('txtDescricaoListView'));
+    Txt.Text := descricao;
+
+    TListItemText(Objects.FindDrawable('txtCategoriaListView')).Text := categoria;
+    TListItemText(Objects.FindDrawable('txtValorListView')).Text := FormatFloat('#,##0.00', valor);
+    TListItemText(Objects.FindDrawable('txtDataListView')).Text := FormatDateTime('dd/mm', DtLancamento);
+
+    // Icone da ListView
+    Img := TListItemImage(Objects.FindDrawable('imgIconeListView'));
+
+    if foto <> nil then
+    begin
+      bmp := TBitmap.Create;
+      bmp.LoadFromStream(Foto);
+
+      Img.OwnsBitmap := True;
+      img.Bitmap := bmp;
+    end;
+  end;
+end;
+
+procedure TFrmPrincipal.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  if Assigned(FrmLancamentos) then
+  begin
+    FrmLancamentos.DisposeOf;
+    FrmLancamentos := nil;
+  end;
+end;
+
+procedure TFrmPrincipal.FormShow(Sender: TObject);
+var
+  Foto: TStream;
+  I: Integer;
+begin
+  Foto := TMemoryStream.Create;
+  imagemTest.Bitmap.SaveToStream(Foto);
+  Foto.Position := 0;
+
+  for I := 1 to 10 do
+    AddLancamentos(1, 'Compra de Passagem Passagem4 Passagem3 Passagem 2Passagem1', 'Transporte', -45.00, Date, Foto);
+
+  Foto.DisposeOf;
+end;
+
+procedure TFrmPrincipal.Image4Click(Sender: TObject);
+var
+  Foto: TStream;
+begin
+  Foto := TMemoryStream.Create;
+  imagemTest.Bitmap.SaveToStream(Foto);
+  Foto.Position := 0;
+
+  AddLancamentos(1, 'Compra de Passagem Passagem4 Passagem3 Passagem 2Passagem1', 'Transporte', -45.00, Date, Foto);
+
+  Foto.DisposeOf;
+end;
+
+procedure TFrmPrincipal.img_menuClick(Sender: TObject);
+begin
+  if not Assigned(FrmCategorias) then
+    Application.CreateForm(TFrmCategorias, FrmCategorias);
+
+  FrmCategorias.Show;
+end;
+
+procedure TFrmPrincipal.lblTodosLancamentosClick(Sender: TObject);
+begin
+  if not Assigned(FrmLancamentos) then
+    Application.CreateForm(TFrmLancamentos, FrmLancamentos);
+
+  FrmLancamentos.Show;
+end;
+
+procedure TFrmPrincipal.lvLancamentoItemClick(const Sender: TObject;
+  const AItem: TListViewItem);
+begin
+  ShowMessage(AItem.TagString); // continuar aqui 19 min aula 10
+end;
+
+procedure TFrmPrincipal.lvLancamentoItemClickEx(const Sender: TObject;
+  ItemIndex: Integer; const LocalClickPos: TPointF;
+  const ItemObject: TListItemDrawable);
+begin
+  {
+  if TListView(Sender).Selected <> nil then
+  begin
+    if ItemObject is TListItemImage then
+    begin
+      Image3.Bitmap := TListItemImage(ItemObject).Bitmap;
+    end;
+
+    if ItemObject is TListItemText then
+    begin
+      Label2.Text := TListItemText(ItemObject).Text;
+    end;
+  end;
+  }
+end;
+
+procedure TFrmPrincipal.lvLancamentoPaint(Sender: TObject; Canvas: TCanvas;
+  const ARect: TRectF);
+begin
+  {
+  if lvlancamento.Items.Count > 0 then
+    if lvlancamento.GetItemRect(lvlancamento.items.Count - 4).Bottom <= lvlancamento.Height then
+    begin
+      AddLancamentos(1, 'Supermercado 1', 'Transporte', -45, date, nil);
+      AddLancamentos(2, 'Supermercado 2', 'Transporte', -45, date, nil);
+      AddLancamentos(3, 'Supermercado 3', 'Transporte', -45, date, nil);
+      AddLancamentos(4, 'Supermercado 4', 'Transporte', -45, date, nil);
+      AddLancamentos(5, 'Supermercado 5', 'Transporte', -45, date, nil);
+    end;
+    }
+end;
+
+procedure TFrmPrincipal.lvLancamentoUpdateObjects(const Sender: TObject;
+  const AItem: TListViewItem);
+var
+  Txt, Txt1: TListItemText;
+  Img: TListItemImage;
+begin
+  // Exemplo utilizando Variável
+  Txt := TListItemText(AItem.Objects.FindDrawable('txtDescricaoListView'));
+  Txt.Width := lvLancamento.Width - Txt.PlaceOffset.X - 90;
+
+  // Exemplo de Resposividade(Ajuste das descricções do ListView
+  Img := TListItemImage(AItem.Objects.FindDrawable('imgIconeListView'));
+  Txt1 := TListItemText(AItem.Objects.FindDrawable('txtCategoriaListView'));
+
+  if lvLancamento.Width < 150 then
+  begin
+    Img.Visible := False;
+    Txt.PlaceOffset.X := 5;
+    Txt1.PlaceOffset.X := 5;
+  end;
+end;
+
+procedure TFrmPrincipal.SetupCategoria(lv: TListView; Item: TListViewItem);
+var
+  txt : TListItemText;
+begin
+  txt := TListItemText(Item.Objects.FindDrawable('TxtCategoria'));
+  txt.Width := lv.Width - txt.PlaceOffset.X - 20;
+end;
+
+procedure TFrmPrincipal.SetupLancamento(lv: TListView; Item: TListViewItem);
+var
+  txt : TListItemText;
+  //img : TListItemImage;
+begin
+  txt := TListItemText(Item.Objects.FindDrawable('TxtDescricao'));
+  txt.Width := lv.Width - txt.PlaceOffset.X - 100;
+
+  {
+  img := TListItemImage(AItem.Objects.FindDrawable('ImgIcone'));
+
+  if lv_lancamento.Width < 200 then
+  begin
+    img.Visible := false;
+    txt.PlaceOffset.X := 2;
+  end;
+  }
+end;
+
+end.

@@ -7,10 +7,6 @@ uses
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
   FMX.Layouts, FMX.Controls.Presentation, FMX.Edit, FMX.StdCtrls, FMX.TabControl,
   System.Actions, FMX.ActnList, uPermissions, FMX.MediaLibrary.Actions,
-  FinancialControl_View_Principal,
-  {$IFDEF ANDROID}
-  FMX.VirtualKeyboard, FMX.Platform,
-  {$ENDIF}
   FMX.StdActns;
 
 type
@@ -84,13 +80,9 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure imgFotoCameraClick(Sender: TObject);
     procedure imgFotoGaleriaClick(Sender: TObject);
-    procedure imgEscolherVoltarClick(Sender: TObject);
-    procedure FormKeyUp(Sender: TObject; var Key: Word; var KeyChar: Char;
-      Shift: TShiftState);
-    procedure RoundRect3Click(Sender: TObject);
   private
     { Private declarations }
-    Permissao : TTGPermissions;
+    Permissao : T99Permissions;
     procedure TrataErroCamera(Sender: TObject);
   public
     { Public declarations }
@@ -110,7 +102,7 @@ end;
 
 procedure TFrmLogin.FormCreate(Sender: TObject);
 begin
-  Permissao := TTGPermissions.Create;
+  Permissao := T99Permissions.Create;
 end;
 
 procedure TFrmLogin.FormDestroy(Sender: TObject);
@@ -118,57 +110,9 @@ begin
   Permissao.DisposeOf;
 end;
 
-procedure TFrmLogin.FormKeyUp(Sender: TObject; var Key: Word; var KeyChar: Char;
-  Shift: TShiftState);
-{$IFDEF ANDROID}
-var
-    FService : IFMXVirtualKeyboardService;
-{$ENDIF}
-begin
-{$IFDEF ANDROID}
-  if (Key = vkHardwareBack) then
-  begin
-    TPlatformServices.Current.SupportsPlatformService(IFMXVirtualKeyboardService,
-      IInterface(FService));
-
-    if (FService <> nil) and
-      (TVirtualKeyboardState.Visible in FService.VirtualKeyBoardState) then
-    begin
-      // Botao back pressionado e teclado visivel...
-      // (apenas fecha o teclado)
-    end
-    else
-    begin
-      // Botao back pressionado e teclado NAO visivel...
-
-      if TabControl1.ActiveTab = TabConta then
-      begin
-        Key := 0;
-        ActLogin.Execute
-      end
-      else if TabControl1.ActiveTab = TabFoto then
-      begin
-        Key := 0;
-        ActConta.Execute
-      end
-      else if TabControl1.ActiveTab = TabEscolher then
-      begin
-        Key := 0;
-        ActFoto.Execute;
-      end;
-    end;
-  end;
-{$ENDIF}
-end;
-
 procedure TFrmLogin.imgCriarContaVoltarClick(Sender: TObject);
 begin
   actConta.Execute;
-end;
-
-procedure TFrmLogin.imgEscolherVoltarClick(Sender: TObject);
-begin
-  actFoto.Execute;
 end;
 
 procedure TFrmLogin.imgFotoCameraClick(Sender: TObject);
@@ -194,15 +138,6 @@ end;
 procedure TFrmLogin.rectContaProximoClick(Sender: TObject);
 begin
   actFoto.Execute;
-end;
-
-procedure TFrmLogin.RoundRect3Click(Sender: TObject);
-begin
-  if not Assigned(FrmPrincipal) then
-  begin
-    FrmPrincipal := TFrmPrincipal.Create(nil);
-    FrmPrincipal.Show;
-  end;
 end;
 
 procedure TFrmLogin.TrataErroCamera(Sender: TObject);

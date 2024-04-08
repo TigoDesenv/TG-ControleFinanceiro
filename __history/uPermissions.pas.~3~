@@ -12,7 +12,7 @@ uses System.Permissions, FMX.DialogService, FMX.MediaLibrary.Actions
 type
   TCallbackProc = procedure(Sender: TObject) of Object;
 
-  TTGPermissions = class
+  T99Permissions = class
   private
     CurrentRequest: string;
     pCamera, pReadStorage, pWriteStorage: string; // Camera / Library
@@ -43,7 +43,7 @@ type
 
 implementation
 
-function TTGPermissions.VerifyCameraAccess(): boolean;
+function T99Permissions.VerifyCameraAccess(): boolean;
 begin
   Result := false;
 
@@ -53,7 +53,7 @@ begin
 {$ENDIF}
 end;
 
-constructor TTGPermissions.Create();
+constructor T99Permissions.Create();
 begin
 {$IFDEF ANDROID}
   pCamera := JStringToString(TJManifest_permission.JavaClass.Camera);
@@ -70,7 +70,7 @@ begin
 {$ENDIF}
 end;
 
-procedure TTGPermissions.PermissionRequestResult(Sender: TObject;
+procedure T99Permissions.PermissionRequestResult(Sender: TObject;
   const APermissions: TArray<string>;
   const AGrantResults: TArray<TPermissionStatus>);
 var
@@ -141,7 +141,7 @@ begin
   end;
 end;
 
-procedure TTGPermissions.Camera(ActionPhoto: TTakePhotoFromCameraAction;
+procedure T99Permissions.Camera(ActionPhoto: TTakePhotoFromCameraAction;
   ACallBackError: TCallbackProc = nil);
 begin
   MyCameraAction := ActionPhoto;
@@ -160,7 +160,7 @@ begin
 {$ENDIF}
 end;
 
-procedure TTGPermissions.PhotoLibrary(ActionLibrary
+procedure T99Permissions.PhotoLibrary(ActionLibrary
   : TTakePhotoFromLibraryAction; ACallBackError: TCallbackProc = nil);
 begin
   MyLibraryAction := ActionLibrary;
@@ -179,7 +179,7 @@ begin
 {$ENDIF}
 end;
 
-procedure TTGPermissions.Location(ACallBack: TCallbackProc = nil;
+procedure T99Permissions.Location(ACallBack: TCallbackProc = nil;
   ACallBackError: TCallbackProc = nil);
 begin
   MyCallBack := ACallBack;
@@ -199,7 +199,7 @@ begin
 {$ENDIF}
 end;
 
-procedure TTGPermissions.PhoneState(ACallBack: TCallbackProc = nil;
+procedure T99Permissions.PhoneState(ACallBack: TCallbackProc = nil;
   ACallBackError: TCallbackProc = nil);
 begin
   MyCallBack := ACallBack;

@@ -1,0 +1,110 @@
+unit FinancialControl_View_Lancamentos;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
+  FMX.Controls.Presentation, FMX.StdCtrls, FMX.Layouts, FMX.ListView.Types,
+  FMX.ListView.Appearances, FMX.ListView.Adapters.Base, FMX.ListView;
+
+type
+  TFrmLancamentos = class(TForm)
+    Layout1: TLayout;
+    Label1: TLabel;
+    img_voltar: TImage;
+    Layout2: TLayout;
+    Image1: TImage;
+    Image2: TImage;
+    Image3: TImage;
+    lbl_mes: TLabel;
+    Rectangle1: TRectangle;
+    Layout3: TLayout;
+    Label5: TLabel;
+    Label4: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    ImgAdd: TImage;
+    lv_lancamento: TListView;
+    procedure img_voltarClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormShow(Sender: TObject);
+    procedure lv_lancamentoUpdateObjects(const Sender: TObject;
+      const AItem: TListViewItem);
+    procedure lv_lancamentoClick(Sender: TObject);
+    procedure ImgAddClick(Sender: TObject);
+  private
+    procedure EditarLancamentos(id_lancamento: Integer);
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmLancamentos: TFrmLancamentos;
+
+implementation
+
+{$R *.fmx}
+
+uses
+  FinancialControl_View_Principal,
+  FinancialControl_View_Cad_Lancamentos;
+
+procedure TFrmLancamentos.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  //Action := TCloseAction.caFree;
+  //FrmLancamentos := nil;  // Estamos destruindo no close do FrmPrincipal
+end;
+
+procedure TFrmLancamentos.FormShow(Sender: TObject);
+var
+  foto : TStream;
+  x : integer;
+begin
+  foto := TMemoryStream.Create;
+  FrmPrincipal.imagemTest.Bitmap.SaveToStream(foto);
+  foto.Position := 0;
+
+  for x := 1 to 10 do
+    FrmPrincipal.AddLancamentos(1,
+                                'Compra de Passagem teste 123456',
+                                'Transporte',
+                                -45,
+                                Date,
+                                foto);
+
+  foto.DisposeOf;
+end;
+
+procedure TFrmLancamentos.ImgAddClick(Sender: TObject);
+begin
+  EditarLancamentos(1);
+end;
+
+procedure TFrmLancamentos.img_voltarClick(Sender: TObject);
+begin
+  close;
+end;
+
+procedure TFrmLancamentos.EditarLancamentos(id_lancamento: Integer);
+begin
+  if not Assigned(frmCadLancamentos) then
+    Application.CreateForm(TFrmCadLancamentos, FrmCadLancamentos);
+    FrmCadLancamentos.Show;
+end;
+
+procedure TFrmLancamentos.lv_lancamentoClick(Sender: TObject);
+begin
+  EditarLancamentos(1);
+end;
+
+procedure TFrmLancamentos.lv_lancamentoUpdateObjects(const Sender: TObject;
+  const AItem: TListViewItem);
+begin
+  FrmPrincipal.SetupLancamento(FrmLancamentos.lv_lancamento, AItem);
+end;
+
+end.
