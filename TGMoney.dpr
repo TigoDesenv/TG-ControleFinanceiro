@@ -9,15 +9,15 @@ uses
   FinancialControl_View_Lancamentos in 'FinancialControl_View_Lancamentos.pas' {FrmLancamentos},
   FinancialControl_View_Cad_Lancamentos in 'FinancialControl_View_Cad_Lancamentos.pas' {FrmCadLancamentos},
   FinancialControl_View_Categorias in 'FinancialControl_View_Categorias.pas' {FrmCategorias},
-  FinancialControl_View_Cad_Categorias in 'FinancialControl_View_Cad_Categorias.pas' {FrmCategoriasCad};
+  FinancialControl_View_Cad_Categorias in 'FinancialControl_View_Cad_Categorias.pas' {FrmCategoriasCad},
+  DM_FinancialControl in 'DM_FinancialControl.pas' {dmFinancialControl: TDataModule};
 
 {$R *.res}
 
 begin
   Application.Initialize;
+  Application.CreateForm(TdmFinancialControl, dmFinancialControl);
   Application.CreateForm(TFrmLogin, FrmLogin);
-  Application.CreateForm(TFrmCategorias, FrmCategorias);
-  Application.CreateForm(TFrmCategoriasCad, FrmCategoriasCad);
   Application.Run;
 
 end.

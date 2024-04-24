@@ -4,12 +4,31 @@
         <ProjectFileVersion>12</ProjectFileVersion>
     </ProjectExtensions>
     <PropertyGroup>
-        <DeviceId Condition="'$(Platform)'=='Android'">RX8N50ABASL</DeviceId>
+        <DeviceId Condition="'$(Platform)'=='Android'"/>
         <DeviceId Condition="'$(Platform)'=='Android64'">RX8N50ABASL</DeviceId>
         <DeviceId Condition="'$(Platform)'=='iOSDevice64'"/>
         <DeviceId Condition="'$(Platform)'=='iOSSimulator'">iPhone5</DeviceId>
     </PropertyGroup>
-    <ItemGroup Condition="'$(Platform)'=='iOSDevice64'"/>
+    <ItemGroup Condition="'$(Platform)'=='iOSDevice64'">
+        <DeployFile Include="DataBase\TGMoney_DB.db" Condition="'$(Config)'=='Release'">
+            <RemoteDir>TGMoney.app\StartUp\Documents\</RemoteDir>
+            <RemoteName>TGMoney_DB.db</RemoteName>
+            <DeployClass>File</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="DataBase\TGMoney_DB.db" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>TGMoney.app\StartUp\Documents\</RemoteDir>
+            <RemoteName>TGMoney_DB.db</RemoteName>
+            <DeployClass>File</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+    </ItemGroup>
     <ItemGroup Condition="'$(Platform)'=='Win64'"/>
     <ItemGroup Condition="'$(Platform)'=='Win32'">
         <DeployFile Include="Win32\Debug\TGMoney.exe" Condition="'$(Config)'=='Debug'">
@@ -23,13 +42,50 @@
             <Required>True</Required>
         </DeployFile>
     </ItemGroup>
-    <ItemGroup Condition="'$(Platform)'=='Android'"/>
+    <ItemGroup Condition="'$(Platform)'=='Android'">
+        <DeployFile Include="DataBase\TGMoney_DB.db" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>TGMoney\assets\internal\</RemoteDir>
+            <RemoteName>TGMoney_DB.db</RemoteName>
+            <DeployClass>File</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="DataBase\TGMoney_DB.db" Condition="'$(Config)'=='Release'">
+            <RemoteDir>TGMoney\assets\internal\</RemoteDir>
+            <RemoteName>TGMoney_DB.db</RemoteName>
+            <DeployClass>File</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+    </ItemGroup>
     <ItemGroup Condition="'$(Platform)'=='iOSSimulator'">
         <DeployFile Include="$(BDS)\Redist\iossimulator\libcgunwind.1.0.dylib">
             <RemoteDir>TGMoney.app\</RemoteDir>
             <RemoteName>libcgunwind.1.0.dylib</RemoteName>
             <DeployClass>DependencyModule</DeployClass>
             <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="DataBase\TGMoney_DB.db" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>TGMoney.app\StartUp\Documents\</RemoteDir>
+            <RemoteName>TGMoney_DB.db</RemoteName>
+            <DeployClass>File</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="DataBase\TGMoney_DB.db" Condition="'$(Config)'=='Release'">
+            <RemoteDir>TGMoney.app\StartUp\Documents\</RemoteDir>
+            <RemoteName>TGMoney_DB.db</RemoteName>
+            <DeployClass>File</DeployClass>
+            <Operation>0</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
@@ -140,6 +196,15 @@
             <RemoteName>styles.xml</RemoteName>
             <DeployClass>AndroidSplashStyles</DeployClass>
             <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="DataBase\TGMoney_DB.db" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>TGMoney\assets\internal\</RemoteDir>
+            <RemoteName>TGMoney_DB.db</RemoteName>
+            <DeployClass>File</DeployClass>
+            <Operation>0</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
@@ -320,6 +385,15 @@
             <RemoteName>splash_image.png</RemoteName>
             <DeployClass>Android_SplashImage470</DeployClass>
             <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="DataBase\TGMoney_DB.db" Condition="'$(Config)'=='Release'">
+            <RemoteDir>TGMoney\assets\internal\</RemoteDir>
+            <RemoteName>TGMoney_DB.db</RemoteName>
+            <DeployClass>File</DeployClass>
+            <Operation>0</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>

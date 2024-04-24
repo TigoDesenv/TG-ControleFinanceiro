@@ -38,6 +38,7 @@ type
     lvLancamento: TListView;
     imagemTest: TImage;
     StyleBook1: TStyleBook;
+    rectMenu: TRectangle;
     procedure FormShow(Sender: TObject);
     procedure Image4Click(Sender: TObject);
     procedure lvLancamentoUpdateObjects(const Sender: TObject;

@@ -82,7 +82,6 @@ begin
   foto.DisposeOf;
 end;
 
-
 procedure TFrmCategorias.img_addClick(Sender: TObject);
 begin
   CadCategoria('');
