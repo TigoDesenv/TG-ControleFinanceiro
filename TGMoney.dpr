@@ -10,13 +10,16 @@ uses
   FinancialControl_View_Cad_Lancamentos in 'FinancialControl_View_Cad_Lancamentos.pas' {FrmCadLancamentos},
   FinancialControl_View_Categorias in 'FinancialControl_View_Categorias.pas' {FrmCategorias},
   FinancialControl_View_Cad_Categorias in 'FinancialControl_View_Cad_Categorias.pas' {FrmCategoriasCad},
-  DM_FinancialControl in 'DM_FinancialControl.pas' {dmFinancialControl: TDataModule};
+  DM_FinancialControl in 'DM_FinancialControl.pas' {dmFinancialControl: TDataModule},
+  Classe_Categoria in 'Classes\Classe_Categoria.pas',
+  cLancamento in 'Classes\cLancamento.pas';
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.CreateForm(TdmFinancialControl, dmFinancialControl);
+  Application.CreateForm(TFrmPrincipal, FrmPrincipal);
   Application.CreateForm(TFrmLogin, FrmLogin);
   Application.Run;
 

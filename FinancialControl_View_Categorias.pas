@@ -3,11 +3,29 @@ unit FinancialControl_View_Categorias;
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
-  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
-  FMX.Objects, FMX.Controls.Presentation, FMX.StdCtrls, FMX.Layouts,
-  FMX.ListView.Types, FMX.ListView.Appearances, FMX.ListView.Adapters.Base,
-  FMX.ListView;
+  System.SysUtils,
+  System.Types,
+  System.UITypes,
+  System.Classes,
+  System.Variants,
+  FMX.Types,
+  FMX.Controls,
+  FMX.Forms,
+  FMX.Graphics,
+  FMX.Dialogs,
+  FMX.Objects,
+  FMX.Controls.Presentation,
+  FMX.StdCtrls,
+  FMX.Layouts,
+  FMX.ListView.Types,
+  FMX.ListView.Appearances,
+  FMX.ListView.Adapters.Base,
+  FMX.ListView,
+  Classe_Categoria,
+  FireDAC.comp.Client,
+  FireDAC.DApt,
+  Data.DB,
+  DM_FinancialControl;
 
 type
   TFrmCategorias = class(TForm)
@@ -16,7 +34,7 @@ type
     img_voltar: TImage;
     Rectangle1: TRectangle;
     Layout3: TLayout;
-    Label6: TLabel;
+    lbl_QtdCategoria: TLabel;
     img_add: TImage;
     lv_categoria: TListView;
     procedure img_voltarClick(Sender: TObject);
@@ -32,6 +50,7 @@ type
     { Private declarations }
   public
     { Public declarations }
+    procedure ListarCategorias;
   end;
 
 var
@@ -49,11 +68,20 @@ procedure TFrmCategorias.CadCategoria(id_cat: string);
 begin
   if not Assigned(FrmCategoriasCad) then
     Application.CreateForm(TFrmCategoriasCad, FrmCategoriasCad);
-
+  // INCLUSÃO
   if id_cat = '' then
+  begin
+    FrmCategoriasCad.Id_Cat := 0;
+    FrmCategoriasCad.Modo := 'I';
     FrmCategoriasCad.lbl_titulo.text := 'Nova Categoria'
+  end
   else
+  // ALTERAÇÃO
+  begin
+    FrmCategoriasCad.Id_Cat := Id_Cat.ToInteger;
+    FrmCategoriasCad.Modo := 'A';
     FrmCategoriasCad.lbl_titulo.text := 'Editar Categoria';
+  end;
 
   FrmCategoriasCad.Show;
 end;
@@ -64,22 +92,67 @@ begin
   FrmCategorias := nil;
 end;
 
-procedure TFrmCategorias.FormShow(Sender: TObject);
+procedure TFrmCategorias.ListarCategorias;
 var
-  foto : TStream;
-  x : integer;
+  Cat: TCategoria;
+  Qry: TFDQuery;
+  Erro: String;
+  Icone: TStream;
 begin
-  foto := TMemoryStream.Create;
-  FrmPrincipal.imagemTest.Bitmap.SaveToStream(foto);
-  foto.Position := 0;
+  try
+    lv_categoria.Items.Clear;
 
-  for x := 1 to 10 do
-    FrmPrincipal.AddCategoria(lv_categoria,
-                              '00001',
-                              'Transporte',
-                              foto);
+    Cat := TCategoria.Create(dmFinancialControl.Connection);
+    Qry := cat.ListarCategoria(erro);
 
-  foto.DisposeOf;
+    Qry.First;
+    while not Qry.Eof do
+    begin
+      // Validação do Ícone
+      if Qry.FieldByName('ICONE').AsString <> '' then
+        Icone := Qry.CreateBlobStream(Qry.FieldByName('ICONE'), TBlobStreamMode.bmRead)
+      else
+        Icone := nil;
+
+      FrmPrincipal.AddCategoria(lv_categoria,
+                                Qry.FieldByName('ID_CATEGORIA').AsInteger,
+                                Qry.FieldByName('DESCRICAO').AsString,
+                                Icone);
+
+      if Icone <> nil then
+        Icone.DisposeOf;
+
+      Qry.Next;
+    end;
+
+    if lv_categoria.Items.Count > 1 then
+      lbl_QtdCategoria.Text := lv_categoria.Items.Count.ToString + ' Categorias'
+    else
+      lbl_QtdCategoria.Text := lv_categoria.Items.Count.ToString + ' Categoria';
+  finally
+    Cat.DisposeOf;
+    Qry.DisposeOf;
+  end;
+end;
+
+procedure TFrmCategorias.FormShow(Sender: TObject);
+//var
+//  Foto : TStream;
+//  x : integer;
+begin
+//  Foto := TMemoryStream.Create;
+//  FrmPrincipal.imagemTest.Bitmap.SaveToStream(foto);
+//  Foto.Position := 0;
+//
+//  for x := 1 to 10 do
+//    FrmPrincipal.AddCategoria(lv_categoria,
+//                              1,
+//                              'Transporte',
+//                              Foto);
+//
+//  Foto.DisposeOf;
+
+  ListarCategorias;
 end;
 
 procedure TFrmCategorias.img_addClick(Sender: TObject);

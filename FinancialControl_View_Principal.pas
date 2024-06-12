@@ -3,11 +3,27 @@ unit FinancialControl_View_Principal;
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
-  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
-  FMX.Layouts, FMX.Controls.Presentation, FMX.StdCtrls, FMX.ListView.Types,
-  FMX.ListView.Appearances, FMX.ListView.Adapters.Base, FMX.ListView,
-  FinancialControl_View_Lancamentos, FinancialControl_View_Categorias;
+  System.SysUtils,
+  System.Types,
+  System.UITypes,
+  System.Classes,
+  System.Variants,
+  FMX.Types,
+  FMX.Controls,
+  FMX.Forms,
+  FMX.Graphics,
+  FMX.Dialogs,
+  FMX.Objects,
+  FMX.Layouts,
+  FMX.Controls.Presentation,
+  FMX.StdCtrls,
+  FMX.ListView.Types,
+  FMX.ListView.Appearances,
+  FMX.ListView.Adapters.Base,
+  FMX.ListView,
+  FinancialControl_View_Lancamentos,
+  FinancialControl_View_Categorias,
+  FMX.Ani;
 
 type
   TFrmPrincipal = class(TForm)
@@ -39,6 +55,11 @@ type
     imagemTest: TImage;
     StyleBook1: TStyleBook;
     rectMenu: TRectangle;
+    LayoutPrincipal: TLayout;
+    AnimationMenu: TFloatAnimation;
+    imgFecharMenu: TImage;
+    LayoutMenuCategoria: TLayout;
+    Label9: TLabel;
     procedure FormShow(Sender: TObject);
     procedure Image4Click(Sender: TObject);
     procedure lvLancamentoUpdateObjects(const Sender: TObject;
@@ -52,6 +73,11 @@ type
     procedure lblTodosLancamentosClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure img_menuClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure AnimationMenuFinish(Sender: TObject);
+    procedure AnimationMenuProcess(Sender: TObject);
+    procedure imgFecharMenuClick(Sender: TObject);
+    procedure LayoutMenuCategoriaClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -62,7 +88,7 @@ type
       foto: TStream);
     procedure SetupLancamento(lv: TListView;
       Item: TListViewItem);
-    procedure AddCategoria(listview: TListView; id_categoria, categoria: string;
+    procedure AddCategoria(listview: TListView; id_categoria: Integer; categoria: string;
               foto: TStream);
     procedure SetupCategoria(lv: TListView; Item: TListViewItem);
   end;
@@ -74,7 +100,7 @@ implementation
 
 {$R *.fmx}
 
-procedure TFrmPrincipal.AddCategoria(listview: TListView; id_categoria,
+procedure TFrmPrincipal.AddCategoria(listview: TListView; id_categoria: Integer;
   categoria: string; foto: TStream);
 var
   txt : TListItemText;
@@ -83,7 +109,7 @@ var
 begin
   with listview.Items.Add do
   begin
-    TagString := id_categoria;
+    TagString := id_categoria.ToString;
 
     txt := TListItemText(Objects.FindDrawable('TxtCategoria'));
     txt.Text := categoria;
@@ -135,6 +161,17 @@ begin
   end;
 end;
 
+procedure TFrmPrincipal.AnimationMenuFinish(Sender: TObject);
+begin
+  LayoutPrincipal.Enabled := AnimationMenu.Inverse;
+  AnimationMenu.Inverse := not AnimationMenu.Inverse;
+end;
+
+procedure TFrmPrincipal.AnimationMenuProcess(Sender: TObject);
+begin
+  LayoutPrincipal.Margins.Right := -260 - rectMenu.Margins.Left;
+end;
+
 procedure TFrmPrincipal.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   if Assigned(FrmLancamentos) then
@@ -142,6 +179,13 @@ begin
     FrmLancamentos.DisposeOf;
     FrmLancamentos := nil;
   end;
+end;
+
+procedure TFrmPrincipal.FormCreate(Sender: TObject);
+begin
+  rectMenu.Margins.Left := - 260;
+  rectMenu.Align := TAlignLayout.Left;
+  rectMenu.Visible := True;
 end;
 
 procedure TFrmPrincipal.FormShow(Sender: TObject);
@@ -167,13 +211,24 @@ begin
   imagemTest.Bitmap.SaveToStream(Foto);
   Foto.Position := 0;
 
-  AddLancamentos(1, 'Compra de Passagem Passagem4 Passagem3 Passagem 2Passagem1', 'Transporte', -45.00, Date, Foto);
+  AddLancamentos(1, 'Compra de Passagem Passagem 4 Passagem 3 Passagem 2 Passagem 1', 'Transporte', -45.00, Date, Foto);
 
   Foto.DisposeOf;
 end;
 
+procedure TFrmPrincipal.imgFecharMenuClick(Sender: TObject);
+begin
+  AnimationMenu.Start;
+end;
+
 procedure TFrmPrincipal.img_menuClick(Sender: TObject);
 begin
+  AnimationMenu.Start;
+end;
+
+procedure TFrmPrincipal.LayoutMenuCategoriaClick(Sender: TObject);
+begin
+  AnimationMenu.Start;
   if not Assigned(FrmCategorias) then
     Application.CreateForm(TFrmCategorias, FrmCategorias);
 
