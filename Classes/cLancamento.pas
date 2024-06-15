@@ -2,7 +2,11 @@ unit cLancamento;
 
 interface
 
-uses FireDAC.Comp.Client, FireDAC.DApt, System.SysUtils, FMX.Graphics;
+uses
+  FireDAC.Comp.Client,
+  FireDAC.DApt,
+  System.SysUtils,
+  FMX.Graphics;
 
 type
   TLancamento = class
@@ -11,17 +15,21 @@ type
     FID_CATEGORIA: Integer;
     FDESCRICAO: string;
     FVALOR: double;
-    FDATA: TDateTime;
+    FDATA_LANC: TDateTime;
     FID_LANCAMENTO: Integer;
+    FDATA_ATE: string;
+    FDATA_DE: string;
   public
     constructor Create(connection: TFDConnection);
     property ID_LANCAMENTO: Integer read FID_LANCAMENTO write FID_LANCAMENTO;
     property ID_CATEGORIA: Integer read FID_CATEGORIA write FID_CATEGORIA;
     property VALOR: double read FVALOR write FVALOR;
-    property DATA: TDateTime read FDATA write FDATA;
+    property DATA_LANC: TDateTime read FDATA_LANC write FDATA_LANC;
+    property DATA_DE: string read FDATA_DE write FDATA_DE;
+    property DATA_ATE: string read FDATA_ATE write FDATA_ATE;
     property DESCRICAO: string read FDESCRICAO write FDESCRICAO;
 
-    function ListarLancamento(out erro: string): TFDQuery;
+    function ListarLancamento(qtd_result: Integer; out erro: string): TFDQuery;
     function Inserir(out erro: string): Boolean;
     function Alterar(out erro: string): Boolean;
     function Excluir(out erro: string): Boolean;
@@ -68,7 +76,7 @@ begin
         SQL.Add('VALUES(:ID_CATEGORIA, :VALOR, :DATA, :DESCRICAO)');
         ParamByName('ID_CATEGORIA').Value := ID_CATEGORIA;
         ParamByName('VALOR').Value := VALOR;
-        ParamByName('DATA').Value := DATA;
+        ParamByName('DATA').Value := DATA_LANC;
         ParamByName('DESCRICAO').Value := DESCRICAO;
         ExecSQL;
       end;
@@ -124,13 +132,13 @@ begin
       begin
         Active := false;
         SQL.Clear;
-        SQL.Add('UPDATE TAB_LANCAMENTO SET ID_CATEGORIA=:ID_CATEGORIA, VALOR=:VALOR, ');
-        SQL.Add('DATA=:DATA, DESCRICAO=:DESCRICAO ');
+        SQL.Add('UPDATE TAB_LANCAMENTO SET ID_CATEGORIA = :ID_CATEGORIA, VALOR =: VALOR, ');
+        SQL.Add('DATA=:DATA, DESCRICAO = :DESCRICAO ');
         SQL.Add('WHERE ID_LANCAMENTO = :ID_LANCAMENTO');
         ParamByName('ID_LANCAMENTO').Value := ID_LANCAMENTO;
         ParamByName('ID_CATEGORIA').Value := ID_CATEGORIA;
         ParamByName('VALOR').Value := VALOR;
-        ParamByName('DATA').Value := DATA;
+        ParamByName('DATA').Value := DATA_LANC;
         ParamByName('DESCRICAO').Value := DESCRICAO;
         ExecSQL;
       end;
@@ -194,7 +202,7 @@ begin
   end;
 end;
 
-function TLancamento.ListarLancamento(out erro: string): TFDQuery;
+function TLancamento.ListarLancamento(qtd_result: Integer; out erro: string): TFDQuery;
 var
   qry: TFDQuery;
 begin
@@ -204,7 +212,7 @@ begin
 
     with qry do
     begin
-      Active := false;
+      Active := False;
       SQL.Clear;
       SQL.Add('SELECT L.*, C.DESCRICAO AS DESCRICAO_CATEGORIA, C.ICONE');
       SQL.Add('FROM TAB_LANCAMENTO L');
@@ -217,7 +225,25 @@ begin
         ParamByName('ID_CATEGORIA').Value := ID_CATEGORIA;
       end;
 
-      Active := true;
+      if ID_CATEGORIA > 0 then
+      begin
+        SQL.Add('AND L.ID_CATEGORIA = :ID_CATEGORIA');
+        ParamByName('ID_CATEGORIA').Value := ID_CATEGORIA;
+      end;
+
+      if (DATA_DE <> '') AND (DATA_ATE <> '') then
+      begin
+        SQL.Add('AND L.DATA BETWEEN :DATA_DE AND :DATA_ATE');
+        ParamByName('DATA_DE').AsString := DATA_DE;
+        ParamByName('DATA_ATE').AsString := DATA_ATE;
+      end;
+
+      SQL.Add('ORDER BY L.DATA');
+
+      if qtd_result > 0 then
+        SQL.Add('LIMIT ' + qtd_result.ToString);
+
+      Active := True;
     end;
 
     Result := qry;

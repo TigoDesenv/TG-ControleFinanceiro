@@ -77,7 +77,7 @@ begin
     except on ex:exception do
     begin
       Result := False;
-      erro := 'Erro ao Inserir Categoria: ' + ex.Message;
+      erro := 'Erro ao Alterar Categoria: ' + ex.Message;
     end;
     end;
   finally
@@ -107,16 +107,28 @@ begin
       qry := TFDQuery.Create(nil);
       qry.Connection := Fconnection;
 
-      // Validar se categoria tem lancamentos
-      // ?????????????????????????????????
-
+   // Valida se categoria tem lancamentos
       with qry do
       begin
         Active := False;
         SQL.Clear;
+        SQL.Add('SELECT * FROM TAB_LANCAMENTO');
+        SQL.Add('WHERE ID_CATEGORIA = :ID_CATEGORIA');
+        ParamByName('ID_CATEGORIA').Value := ID_CATEGORIA;
+        Active := True;
+
+        if RecordCount > 0 then
+        begin
+          Result := False;
+          erro := 'A categoria possui lançamentos e não pode ser excluída';
+          Exit;
+        end;
+
+        Active := False;
+        SQL.Clear;
         SQL.Add('DELETE FROM TAB_CATEGORIA ');
         SQL.Add('WHERE ID_CATEGORIA = :ID_CATEGORIA');
-        ParamByName('ID_CATEGORIA').AsInteger := ID_CATEGORIA;
+        ParamByName('ID_CATEGORIA').Value := ID_CATEGORIA;
         ExecSQL;
       end;
 
@@ -126,7 +138,7 @@ begin
     except on ex:exception do
     begin
       Result := False;
-      erro := 'Erro ao Inserir Categoria: ' + ex.Message;
+      erro := 'Erro ao Excluir Categoria: ' + ex.Message;
     end;
     end;
   finally

@@ -121,6 +121,7 @@ var
   Qry: TFDQuery;
   Erro: String;
   Item: TListBoxItem;
+  Img: TImage;
 begin
   if Modo = 'I' then
   begin
@@ -140,8 +141,11 @@ begin
       edt_DescricaoCategoria.Text := Qry.FieldByName('DESCRICAO').AsString;
 
       // Icone........
-      Item := lb_icone.ItemByIndex(Qry.FieldByName('INDICE_ICONE').AsInteger);
+      Item := lb_icone.ItemByIndex(Qry.FieldByName('INDICE_ICONE').AsInteger); // Itens da lisbox
       img_selecao.Parent := Item;
+
+      Img :=  FrmCategoriasCad.FindComponent('Image' + (Item.Index + 1).ToString) as TImage;
+      SelecionaIcone(Img);
     finally
       Qry.DisposeOf;
       Cat.DisposeOf;
@@ -179,7 +183,7 @@ begin
           if not Cat.Excluir(Erro) then
           begin
             ShowMessage(Erro);
-            Abort;
+            Exit;
           end;
 
           FrmCategorias.ListarCategorias;

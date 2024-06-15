@@ -23,7 +23,13 @@ uses
   FMX.ListView,
   FinancialControl_View_Lancamentos,
   FinancialControl_View_Categorias,
-  FMX.Ani;
+  FinancialControl_View_Cad_Lancamentos,
+  FMX.Ani,
+  cLancamento,
+  DM_FinancialControl,
+  FireDAC.Comp.Client,
+  FireDAC.DApt,
+  Data.DB;
 
 type
   TFrmPrincipal = class(TForm)
@@ -46,7 +52,7 @@ type
     Label6: TLabel;
     Label7: TLabel;
     Rectangle1: TRectangle;
-    Image4: TImage;
+    ImgAdd: TImage;
     Rectangle2: TRectangle;
     Layout7: TLayout;
     Label8: TLabel;
@@ -61,7 +67,7 @@ type
     LayoutMenuCategoria: TLayout;
     Label9: TLabel;
     procedure FormShow(Sender: TObject);
-    procedure Image4Click(Sender: TObject);
+    procedure ImgAddClick(Sender: TObject);
     procedure lvLancamentoUpdateObjects(const Sender: TObject;
       const AItem: TListViewItem);
     procedure lvLancamentoItemClick(const Sender: TObject;
@@ -82,7 +88,7 @@ type
     { Private declarations }
   public
     { Public declarations }
-    procedure AddLancamentos(id_lacamentos: Integer;
+    procedure AddLancamento(List: TListView; id_lacamentos: Integer;
       descricao, categoria: String; valor: Double;
       DtLancamento: TDateTime;
       foto: TStream);
@@ -91,6 +97,7 @@ type
     procedure AddCategoria(listview: TListView; id_categoria: Integer; categoria: string;
               foto: TStream);
     procedure SetupCategoria(lv: TListView; Item: TListViewItem);
+    procedure ListarLancamentos;
   end;
 
 var
@@ -128,27 +135,27 @@ begin
   end;
 end;
 
-procedure TFrmPrincipal.AddLancamentos(id_lacamentos: Integer; descricao,
+procedure TFrmPrincipal.AddLancamento(List: TListView; id_lacamentos: Integer; descricao,
   categoria: String; valor: Double; DtLancamento: TDateTime; Foto: TStream);
 var
   Txt: TListItemText;
   Img: TListItemImage;
   bmp: TBitmap;
 begin
-  with lvLancamento.Items.Add do
+  with List.Items.Add do
   begin
     // Exemplo utilizando Variável
     TagString := id_lacamentos.ToString;
 
-    Txt := TListItemText(Objects.FindDrawable('txtDescricaoListView'));
+    Txt := TListItemText(Objects.FindDrawable('TxtDescricao'));
     Txt.Text := descricao;
 
-    TListItemText(Objects.FindDrawable('txtCategoriaListView')).Text := categoria;
-    TListItemText(Objects.FindDrawable('txtValorListView')).Text := FormatFloat('#,##0.00', valor);
-    TListItemText(Objects.FindDrawable('txtDataListView')).Text := FormatDateTime('dd/mm', DtLancamento);
+    TListItemText(Objects.FindDrawable('TxtCategoria')).Text := categoria;
+    TListItemText(Objects.FindDrawable('TxtValor')).Text := FormatFloat('#,##0.00', valor);
+    TListItemText(Objects.FindDrawable('TxtData')).Text := FormatDateTime('dd/mm', DtLancamento);
 
     // Icone da ListView
-    Img := TListItemImage(Objects.FindDrawable('imgIconeListView'));
+    Img := TListItemImage(Objects.FindDrawable('ImgIcone'));
 
     if foto <> nil then
     begin
@@ -189,31 +196,29 @@ begin
 end;
 
 procedure TFrmPrincipal.FormShow(Sender: TObject);
-var
-  Foto: TStream;
-  I: Integer;
 begin
-  Foto := TMemoryStream.Create;
-  imagemTest.Bitmap.SaveToStream(Foto);
-  Foto.Position := 0;
-
-  for I := 1 to 10 do
-    AddLancamentos(1, 'Compra de Passagem Passagem4 Passagem3 Passagem 2Passagem1', 'Transporte', -45.00, Date, Foto);
-
-  Foto.DisposeOf;
+  ListarLancamentos;
 end;
 
-procedure TFrmPrincipal.Image4Click(Sender: TObject);
+procedure TFrmPrincipal.ImgAddClick(Sender: TObject);
 var
   Foto: TStream;
 begin
-  Foto := TMemoryStream.Create;
-  imagemTest.Bitmap.SaveToStream(Foto);
-  Foto.Position := 0;
+  if not Assigned(frmCadLancamentos) then
+    Application.CreateForm(TFrmCadLancamentos, FrmCadLancamentos);
 
-  AddLancamentos(1, 'Compra de Passagem Passagem 4 Passagem 3 Passagem 2 Passagem 1', 'Transporte', -45.00, Date, Foto);
+  FrmCadLancamentos.Modo := 'I';
+  FrmCadLancamentos.Id_Lanc := 0;
+  FrmCadLancamentos.Show;
 
-  Foto.DisposeOf;
+
+//  Foto := TMemoryStream.Create;
+//  imagemTest.Bitmap.SaveToStream(Foto);
+//  Foto.Position := 0;
+//
+//  AddLancamento(lvLancamento, 1, 'Compra de Passagem Passagem 4 Passagem 3 Passagem 2 Passagem 1', 'Transporte', -45.00, Date, Foto);
+//
+//  Foto.DisposeOf;
 end;
 
 procedure TFrmPrincipal.imgFecharMenuClick(Sender: TObject);
@@ -241,6 +246,48 @@ begin
     Application.CreateForm(TFrmLancamentos, FrmLancamentos);
 
   FrmLancamentos.Show;
+end;
+
+procedure TFrmPrincipal.ListarLancamentos;
+var
+  Foto: TStream;
+  xLancamento: TLancamento;
+  qryAux: TFDQuery;
+  Erro: String;
+begin
+  try
+    xLancamento := TLancamento.Create(dmFinancialControl.Connection);
+    qryAux := xLancamento.ListarLancamento(10, Erro);
+
+    if Erro <> '' then
+    begin
+      ShowMessage(Erro);
+      Exit;
+    end;
+
+    qryAux.First;
+    while not qryAux.Eof do
+    begin
+      if qryAux.FieldByName('ICONE').AsString <> '' then
+        Foto := qryAux.CreateBlobStream(qryAux.FieldByName('ICONE'), TBlobStreamMode.bmRead)
+      else
+        Foto := nil;
+
+      AddLancamento(lvLancamento,
+        qryAux.FieldByName('ID_LANCAMENTO').AsInteger,
+        qryAux.FieldByName('DESCRICAO').AsString,
+        qryAux.FieldByName('DESCRICAO_CATEGORIA').AsString,
+        qryAux.FieldByName('VALOR').AsFloat,
+        qryAux.FieldByName('DATA').AsDateTime,
+        Foto);
+      qryAux.Next;
+
+      Foto.DisposeOf;
+    end;
+
+  finally
+    xLancamento.DisposeOf;
+  end;
 end;
 
 procedure TFrmPrincipal.lvLancamentoItemClick(const Sender: TObject;
@@ -292,12 +339,12 @@ var
   Img: TListItemImage;
 begin
   // Exemplo utilizando Variável
-  Txt := TListItemText(AItem.Objects.FindDrawable('txtDescricaoListView'));
+  Txt := TListItemText(AItem.Objects.FindDrawable('TxtDescricao'));
   Txt.Width := lvLancamento.Width - Txt.PlaceOffset.X - 90;
 
   // Exemplo de Resposividade(Ajuste das descricções do ListView
-  Img := TListItemImage(AItem.Objects.FindDrawable('imgIconeListView'));
-  Txt1 := TListItemText(AItem.Objects.FindDrawable('txtCategoriaListView'));
+  Img := TListItemImage(AItem.Objects.FindDrawable('ImgIcone'));
+  Txt1 := TListItemText(AItem.Objects.FindDrawable('TxtCategoria'));
 
   if lvLancamento.Width < 150 then
   begin
