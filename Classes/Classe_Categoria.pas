@@ -209,7 +209,7 @@ begin
         SQL.Add('AND ID_CATEGORIA = :ID_CATEGORIA');
         ParamByName('ID_CATEGORIA').AsInteger := ID_CATEGORIA;
       end;
-
+      SQL.Add('ORDER BY DESCRICAO');
 //      if Length(Trim(DESCRICAO)) > 0 then
 //      begin
 //        SQL.Add('AND DESCRICAO = :DESCRICAO');

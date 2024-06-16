@@ -47,26 +47,27 @@ type
     lbl_Saldo: TLabel;
     Label7: TLabel;
     ImgAdd: TImage;
-    lv_lancamento: TListView;
+    lvlancamento: TListView;
     procedure img_voltarClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
-    procedure lv_lancamentoUpdateObjects(const Sender: TObject;
+    procedure lvlancamentoUpdateObjects(const Sender: TObject;
       const AItem: TListViewItem);
     procedure ImgAddClick(Sender: TObject);
     procedure ImgMesProximoClick(Sender: TObject);
     procedure ImgMesAnteriorClick(Sender: TObject);
-    procedure lv_lancamentoItemClick(const Sender: TObject;
+    procedure lvlancamentoItemClick(const Sender: TObject;
       const AItem: TListViewItem);
   private
     DataFiltro: TDate;
     procedure MostrarLancamentos(id_lancamento: Integer);
-    procedure ListaDeLancamentos;
+//    procedure ListarLancamentosPeriodo;
     procedure NavegarMes(num_mes: integer);
     function NomeMes: string;
     { Private declarations }
   public
     { Public declarations }
+    procedure ListarLancamentosPeriodo;
   end;
 
 var
@@ -112,7 +113,7 @@ begin
   close;
 end;
 
-procedure TFrmLancamentos.ListaDeLancamentos;
+procedure TFrmLancamentos.ListarLancamentosPeriodo;
 var
   Foto: TStream;
   xLancamento: TLancamento;
@@ -122,7 +123,7 @@ var
   ValorDespesa: Double;
 begin
   try
-    FrmLancamentos.lv_lancamento.Items.Clear;
+    FrmLancamentos.lvlancamento.Items.Clear;
     ValorReceita := 0;
     ValorDespesa := 0;
 
@@ -144,7 +145,7 @@ begin
       else
         Foto := nil;
 
-      FrmPrincipal.AddLancamento(lv_lancamento,
+      FrmPrincipal.AddLancamento(lvlancamento,
         qryAux.FieldByName('ID_LANCAMENTO').AsInteger,
         qryAux.FieldByName('DESCRICAO').AsString,
         qryAux.FieldByName('DESCRICAO_CATEGORIA').AsString,
@@ -184,28 +185,32 @@ begin
   else
   begin
     FrmCadLancamentos.Modo := 'I';
-    FrmCadLancamentos.Id_Lanc := 0;
+    FrmCadLancamentos.Id_Lanc := -1;
   end;
-  FrmCadLancamentos.Show;
+
+  FrmCadLancamentos.ShowModal(procedure(ModalResult: TModalResult)
+                              begin
+                                ListarLancamentosPeriodo;
+                               end);
 end;
 
-procedure TFrmLancamentos.lv_lancamentoItemClick(const Sender: TObject;
+procedure TFrmLancamentos.lvlancamentoItemClick(const Sender: TObject;
   const AItem: TListViewItem);
 begin
   MostrarLancamentos(StrToInt(AItem.TagString));
 end;
 
-procedure TFrmLancamentos.lv_lancamentoUpdateObjects(const Sender: TObject;
+procedure TFrmLancamentos.lvlancamentoUpdateObjects(const Sender: TObject;
   const AItem: TListViewItem);
 begin
-  FrmPrincipal.SetupLancamento(FrmLancamentos.lv_lancamento, AItem);
+  FrmPrincipal.SetupLancamento(FrmLancamentos.lvlancamento, AItem);
 end;
 
 procedure TFrmLancamentos.NavegarMes(num_mes: integer);
 begin
   DataFiltro := IncMonth(DataFiltro, num_mes);
   lbl_mes.Text := NomeMes;
-  ListaDeLancamentos;
+  ListarLancamentosPeriodo;
 end;
 
 function TFrmLancamentos.NomeMes: string;

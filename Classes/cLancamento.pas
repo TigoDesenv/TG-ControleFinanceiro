@@ -132,8 +132,8 @@ begin
       begin
         Active := false;
         SQL.Clear;
-        SQL.Add('UPDATE TAB_LANCAMENTO SET ID_CATEGORIA = :ID_CATEGORIA, VALOR =: VALOR, ');
-        SQL.Add('DATA=:DATA, DESCRICAO = :DESCRICAO ');
+        SQL.Add('UPDATE TAB_LANCAMENTO SET ID_CATEGORIA = :ID_CATEGORIA, VALOR = :VALOR,');
+        SQL.Add('DATA = :DATA, DESCRICAO = :DESCRICAO ');
         SQL.Add('WHERE ID_LANCAMENTO = :ID_LANCAMENTO');
         ParamByName('ID_LANCAMENTO').Value := ID_LANCAMENTO;
         ParamByName('ID_CATEGORIA').Value := ID_CATEGORIA;
@@ -219,10 +219,10 @@ begin
       SQL.Add('JOIN TAB_CATEGORIA C ON (C.ID_CATEGORIA = L.ID_CATEGORIA)');
       SQL.Add('WHERE 1 = 1');
 
-      if ID_CATEGORIA > 0 then
+      if ID_LANCAMENTO > 0 then
       begin
-        SQL.Add('AND L.ID_CATEGORIA = :ID_CATEGORIA');
-        ParamByName('ID_CATEGORIA').Value := ID_CATEGORIA;
+        SQL.Add('AND L.ID_LANCAMENTO = :ID_LANCAMENTO');
+        ParamByName('ID_LANCAMENTO').Value := ID_LANCAMENTO;
       end;
 
       if ID_CATEGORIA > 0 then
@@ -238,7 +238,7 @@ begin
         ParamByName('DATA_ATE').AsString := DATA_ATE;
       end;
 
-      SQL.Add('ORDER BY L.DATA');
+      SQL.Add('ORDER BY L.DATA DESC');
 
       if qtd_result > 0 then
         SQL.Add('LIMIT ' + qtd_result.ToString);

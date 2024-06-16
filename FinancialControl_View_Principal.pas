@@ -97,7 +97,7 @@ type
     procedure AddCategoria(listview: TListView; id_categoria: Integer; categoria: string;
               foto: TStream);
     procedure SetupCategoria(lv: TListView; Item: TListViewItem);
-    procedure ListarLancamentos;
+    procedure ListarUltimosLancamentos;
   end;
 
 var
@@ -197,7 +197,7 @@ end;
 
 procedure TFrmPrincipal.FormShow(Sender: TObject);
 begin
-  ListarLancamentos;
+  ListarUltimosLancamentos;
 end;
 
 procedure TFrmPrincipal.ImgAddClick(Sender: TObject);
@@ -208,17 +208,13 @@ begin
     Application.CreateForm(TFrmCadLancamentos, FrmCadLancamentos);
 
   FrmCadLancamentos.Modo := 'I';
-  FrmCadLancamentos.Id_Lanc := 0;
+  FrmCadLancamentos.Id_Lanc := -1;
   FrmCadLancamentos.Show;
 
-
-//  Foto := TMemoryStream.Create;
-//  imagemTest.Bitmap.SaveToStream(Foto);
-//  Foto.Position := 0;
-//
-//  AddLancamento(lvLancamento, 1, 'Compra de Passagem Passagem 4 Passagem 3 Passagem 2 Passagem 1', 'Transporte', -45.00, Date, Foto);
-//
-//  Foto.DisposeOf;
+  FrmCadLancamentos.ShowModal(procedure(ModalResult: TModalResult)
+                              begin
+                                ListarUltimosLancamentos;
+                               end);
 end;
 
 procedure TFrmPrincipal.imgFecharMenuClick(Sender: TObject);
@@ -248,7 +244,7 @@ begin
   FrmLancamentos.Show;
 end;
 
-procedure TFrmPrincipal.ListarLancamentos;
+procedure TFrmPrincipal.ListarUltimosLancamentos;
 var
   Foto: TStream;
   xLancamento: TLancamento;
@@ -256,6 +252,7 @@ var
   Erro: String;
 begin
   try
+    FrmPrincipal.lvlancamento.Items.Clear;
     xLancamento := TLancamento.Create(dmFinancialControl.Connection);
     qryAux := xLancamento.ListarLancamento(10, Erro);
 
@@ -293,7 +290,16 @@ end;
 procedure TFrmPrincipal.lvLancamentoItemClick(const Sender: TObject;
   const AItem: TListViewItem);
 begin
-  ShowMessage(AItem.TagString); // continuar aqui 19 min aula 10
+  if not Assigned(FrmCadLancamentos) then
+      Application.CreateForm(TFrmCadLancamentos, FrmCadLancamentos);
+
+  FrmCadLancamentos.modo := 'A';
+  FrmCadLancamentos.id_lanc := Aitem.TagString.ToInteger;
+
+  FrmCadLancamentos.ShowModal(procedure(ModalResult: TModalResult)
+                              begin
+                                ListarUltimosLancamentos;
+                              end);
 end;
 
 procedure TFrmPrincipal.lvLancamentoItemClickEx(const Sender: TObject;

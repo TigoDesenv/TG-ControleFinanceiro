@@ -21,7 +21,9 @@ uses
   FMX.Edit,
   FMX.ListBox,
   DM_FinancialControl,
+  FinancialControl_View_Lancamentos,
   cLancamento,
+  uFormat,
   Classe_Categoria,
   FireDAC.comp.Client,
   FireDAC.DApt,
@@ -61,6 +63,8 @@ type
     procedure ImgHojeClick(Sender: TObject);
     procedure ImgOntemClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure edt_ValorLancTyping(Sender: TObject);
+    procedure imgExcluirClick(Sender: TObject);
   private
     { Private declarations }
     procedure ComboCategoria;
@@ -111,6 +115,11 @@ begin
     qryAux.DisposeOf;
     Categoria.DisposeOf;
   end;
+end;
+
+procedure TFrmCadLancamentos.edt_ValorLancTyping(Sender: TObject);
+begin
+  Formatar(edt_ValorLanc, TFormato.Valor);
 end;
 
 procedure TFrmCadLancamentos.FormShow(Sender: TObject);
@@ -191,6 +200,23 @@ begin
     ImgTipoLancamento.Bitmap := ImgReceita.Bitmap;
     ImgTipoLancamento.Tag := 1;
   end;
+end;
+
+procedure TFrmCadLancamentos.imgExcluirClick(Sender: TObject);
+var
+  Lanc: TLancamento;
+  erro : string;
+begin
+  Lanc := TLancamento.Create(dmFinancialControl.Connection);
+  Lanc.ID_LANCAMENTO := Id_Lanc;
+  Lanc.Excluir(erro);
+  FrmCadLancamentos.Close;
+//  FrmLancamentos.ListarLancamentosPeriodo;
+
+//  edt_DescricaoLanc.Text := '';
+//  edt_ValorLanc.Text := '';
+//  cmb_categoria.ItemIndex := -1;
+//  edtDataLanc.Date := Date;
 end;
 
 procedure TFrmCadLancamentos.img_saveClick(Sender: TObject);
