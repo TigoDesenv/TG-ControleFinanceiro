@@ -29,7 +29,8 @@ uses
   DM_FinancialControl,
   FireDAC.Comp.Client,
   FireDAC.DApt,
-  Data.DB;
+  Data.DB,
+  cUsuario;
 
 type
   TFrmPrincipal = class(TForm)
@@ -66,6 +67,8 @@ type
     imgFecharMenu: TImage;
     LayoutMenuCategoria: TLayout;
     Label9: TLabel;
+    LayoutMenuLogoff: TLayout;
+    Label10: TLabel;
     procedure FormShow(Sender: TObject);
     procedure ImgAddClick(Sender: TObject);
     procedure lvLancamentoUpdateObjects(const Sender: TObject;
@@ -84,6 +87,7 @@ type
     procedure AnimationMenuProcess(Sender: TObject);
     procedure imgFecharMenuClick(Sender: TObject);
     procedure LayoutMenuCategoriaClick(Sender: TObject);
+    procedure LayoutMenuLogoffClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -106,6 +110,9 @@ var
 implementation
 
 {$R *.fmx}
+
+uses
+  FinancialControl_View_Login;
 
 procedure TFrmPrincipal.AddCategoria(listview: TListView; id_categoria: Integer;
   categoria: string; foto: TStream);
@@ -234,6 +241,32 @@ begin
     Application.CreateForm(TFrmCategorias, FrmCategorias);
 
   FrmCategorias.Show;
+end;
+
+procedure TFrmPrincipal.LayoutMenuLogoffClick(Sender: TObject);
+var
+  User : TUsuario;
+    erro : string;
+begin
+  try
+    User := TUsuario.Create(dmFinancialControl.Connection);
+
+    if not User.Logout(erro) then
+    begin
+      showmessage(erro);
+      exit;
+    end;
+
+  finally
+    User.DisposeOf;
+  end;
+
+  if NOT Assigned(FrmLogin) then
+    Application.CreateForm(TFrmLogin, FrmLogin);
+
+  Application.MainForm := FrmLogin;
+  FrmLogin.Show;
+  FrmPrincipal.Close;
 end;
 
 procedure TFrmPrincipal.lblTodosLancamentosClick(Sender: TObject);

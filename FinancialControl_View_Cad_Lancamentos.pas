@@ -20,6 +20,7 @@ uses
   FMX.DateTimeCtrls,
   FMX.Edit,
   FMX.ListBox,
+  FMX.DialogService,
   DM_FinancialControl,
   FinancialControl_View_Lancamentos,
   cLancamento,
@@ -205,18 +206,40 @@ end;
 procedure TFrmCadLancamentos.imgExcluirClick(Sender: TObject);
 var
   Lanc: TLancamento;
-  erro : string;
+  Erro : string;
 begin
-  Lanc := TLancamento.Create(dmFinancialControl.Connection);
-  Lanc.ID_LANCAMENTO := Id_Lanc;
+
+
   Lanc.Excluir(erro);
   FrmCadLancamentos.Close;
-//  FrmLancamentos.ListarLancamentosPeriodo;
 
-//  edt_DescricaoLanc.Text := '';
-//  edt_ValorLanc.Text := '';
-//  cmb_categoria.ItemIndex := -1;
-//  edtDataLanc.Date := Date;
+  TDialogService.MessageDialog('Confirma Exclusão do Lançamento?',
+    TMsgDlgType.mtConfirmation,
+    [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo],
+    TMsgDlgBtn.mbNo,
+    0,
+    procedure(const AResult: TModalResult)
+    var
+      Erro: String;
+    begin
+      if AResult = mrYes then
+      begin
+        try
+          Lanc := TLancamento.Create(dmFinancialControl.Connection);
+          Lanc.ID_LANCAMENTO := Id_Lanc;
+
+          if not Lanc.Excluir(Erro) then
+          begin
+            ShowMessage(Erro);
+            Exit;
+          end;
+
+          Close;
+        finally
+          Lanc.DisposeOf;
+        end;
+      end;
+    end);
 end;
 
 procedure TFrmCadLancamentos.img_saveClick(Sender: TObject);

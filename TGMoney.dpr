@@ -13,14 +13,14 @@ uses
   Classe_Categoria in 'Classes\Classe_Categoria.pas',
   cLancamento in 'Classes\cLancamento.pas',
   uFormat in 'Units Auxiliares\uFormat.pas',
-  uPermissions in 'Units Auxiliares\uPermissions.pas';
+  uPermissions in 'Units Auxiliares\uPermissions.pas',
+  cUsuario in 'Classes\cUsuario.pas';
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.CreateForm(TdmFinancialControl, dmFinancialControl);
-  Application.CreateForm(TFrmPrincipal, FrmPrincipal);
   Application.CreateForm(TFrmLogin, FrmLogin);
   Application.Run;
 
