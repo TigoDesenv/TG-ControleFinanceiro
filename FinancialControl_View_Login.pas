@@ -11,10 +11,13 @@ uses
   FireDAC.comp.Client,
   FireDAC.DApt,
   Data.DB,
+  uFuncoesTeclado,
   {$IFDEF ANDROID}
   FMX.VirtualKeyboard, FMX.Platform,
   {$ENDIF}
-  FMX.StdActns;
+  FMX.StdActns, FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, Datasnap.DBClient, FireDAC.Comp.DataSet;
 
 type
   TFrmLogin = class(TForm)
@@ -79,6 +82,8 @@ type
     actCamera: TTakePhotoFromCameraAction;
     edt_cad_email: TEdit;
     Timer1: TTimer;
+    Circle1: TCircle;
+    Circle2: TCircle;
     procedure lblCriarContaClick(Sender: TObject);
     procedure lblLoginInicioClick(Sender: TObject);
     procedure rectContaProximoClick(Sender: TObject);
@@ -95,31 +100,64 @@ type
     procedure rectContaClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+    procedure FormVirtualKeyboardShown(Sender: TObject;
+      KeyboardVisible: Boolean; const Bounds: TRect);
+    procedure FormVirtualKeyboardHidden(Sender: TObject;
+      KeyboardVisible: Boolean; const Bounds: TRect);
+    procedure actLibraryDidFinishTaking(Image: TBitmap);
+    procedure actCameraDidFinishTaking(Image: TBitmap);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
     Permissao : TTGPermissions;
-    procedure TrataErroCamera(Sender: TObject);
+    procedure TrataPermissao(Sender: TObject);
   public
     { Public declarations }
   end;
 
 var
   FrmLogin: TFrmLogin;
+  AlterandoFoto: Boolean;
 
 implementation
 
 {$R *.fmx}
 
-uses cUsuario, DM_FinancialControl;
+uses
+  cUsuario,
+  DM_FinancialControl;
+
+procedure TFrmLogin.actCameraDidFinishTaking(Image: TBitmap);
+begin
+  circEditarFoto.Fill.Bitmap.Bitmap := Image;
+
+  ActFoto.Execute;
+end;
+
+procedure TFrmLogin.actLibraryDidFinishTaking(Image: TBitmap);
+begin
+  circEditarFoto.Fill.Bitmap.Bitmap := Image;
+
+  ActFoto.Execute;
+end;
 
 procedure TFrmLogin.circEditarFotoClick(Sender: TObject);
 begin
   actEscolher.Execute;
 end;
 
+procedure TFrmLogin.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := TCloseAction.caFree;
+  FrmLogin := nil;
+end;
+
 procedure TFrmLogin.FormCreate(Sender: TObject);
 begin
   Permissao := TTGPermissions.Create;
+  AlterandoFoto := False;
+  if AlterandoFotoLogin then
+    AlterandoFoto := True;
 end;
 
 procedure TFrmLogin.FormDestroy(Sender: TObject);
@@ -145,6 +183,7 @@ begin
     begin
       // Botao back pressionado e teclado visivel...
       // (apenas fecha o teclado)
+      TabControl1.Margins.Bottom := 0;
     end
     else
     begin
@@ -172,8 +211,28 @@ end;
 
 procedure TFrmLogin.FormShow(Sender: TObject);
 begin
-  TabControl1.ActiveTab := TabLogin;
-  Timer1.Enabled := True;
+  if not AlterandoFoto then
+  begin
+    TabControl1.ActiveTab := TabLogin;
+    Timer1.Enabled := True;
+  end;
+  if AlterandoFoto then
+  begin
+    TabControl1.ActiveTab := TabFoto;
+    Label3.Text := 'Confirmar Alteração';
+  end;
+end;
+
+procedure TFrmLogin.FormVirtualKeyboardHidden(Sender: TObject;
+  KeyboardVisible: Boolean; const Bounds: TRect);
+begin
+  //TabControl1.Margins.Bottom := 0;
+end;
+
+procedure TFrmLogin.FormVirtualKeyboardShown(Sender: TObject;
+  KeyboardVisible: Boolean; const Bounds: TRect);
+begin
+  TabControl1.Margins.Bottom := 160;
 end;
 
 procedure TFrmLogin.imgCriarContaVoltarClick(Sender: TObject);
@@ -188,12 +247,12 @@ end;
 
 procedure TFrmLogin.imgFotoCameraClick(Sender: TObject);
 begin
-  Permissao.Camera(actCamera, TrataErroCamera);
+  Permissao.Camera(actCamera, TrataPermissao);
 end;
 
 procedure TFrmLogin.imgFotoGaleriaClick(Sender: TObject);
 begin
-  Permissao.PhotoLibrary(actLibrary, TrataErroCamera);
+  Permissao.PhotoLibrary(actLibrary, TrataPermissao);
 end;
 
 procedure TFrmLogin.lblCriarContaClick(Sender: TObject);
@@ -212,27 +271,47 @@ var
   Erro: String;
 begin
   try
-    User := TUsuario.Create(dmFinancialControl.Connection);
-    User.NOME := edt_cad_nome.Text;
-    User.EMAIL := edt_cad_email.Text;
-    User.SENHA := edt_cad_senha.Text;
-    USer.IND_LOGIN := 'S';
-    User.FOTO := circEditarFoto.Fill.Bitmap.Bitmap;
+    User := TUsuario.Create(dmFinancialControl.Conexao);
 
-    // Excluir conta existente...
-    if not User.Excluir(Erro) then
+    if not AlterandoFoto then
     begin
-      ShowMessage(Erro);
-      Exit;
-    end;
+      User.NOME := edt_cad_nome.Text;
+      User.EMAIL := edt_cad_email.Text;
+      User.SENHA := edt_cad_senha.Text;
+      USer.IND_LOGIN := 'S';
+      User.FOTO := circEditarFoto.Fill.Bitmap.Bitmap;
+//      User.FOTO := circle1.Fill.Bitmap.Bitmap;
 
-    // Cadastrar novo usuário...
-    if not User.Inserir(Erro) then
+      // Excluir conta existente...
+      if not User.Excluir(Erro) then
+      begin
+        ShowMessage(Erro + '00');
+        TabControl1.ActiveTab := TabConta;
+        Exit;
+      end;
+
+      // Cadastrar novo usuário...
+      if not User.Inserir(Erro) then
+      begin
+        ShowMessage(Erro + '01');
+        TabControl1.ActiveTab := TabConta;
+        Exit;
+      end;
+    end
+    else
     begin
-      ShowMessage(Erro);
-      Exit;
-    end;
+      User.BuscaUsuarioLogado(Erro);
+//      User.FOTO := circle2.Fill.Bitmap.Bitmap;
+      User.FOTO := circEditarFoto.Fill.Bitmap.Bitmap;
 
+      if not User.Alterar(Erro) then
+      begin
+        ShowMessage(Erro + '03');
+        TabControl1.ActiveTab := TabConta;
+        Exit;
+      end;
+      FrmPrincipal.CarregaIcone;
+    end;
   finally
     User.DisposeOf;
   end;
@@ -256,7 +335,7 @@ var
   Erro: String;
 begin
   try
-    User := TUsuario.Create(dmFinancialControl.Connection);
+    User := TUsuario.Create(dmFinancialControl.Conexao);
     User.EMAIL := edt_login_email.Text;
     User.SENHA := edt_login_senha.Text;
 
@@ -284,11 +363,11 @@ var
   Erro: String;
   qryAux: TFDQuery;
 begin
-  Timer1.Enabled := false;
+  Timer1.Enabled := False;
 
   // Valida se usuario ja esta logado
   try
-    User := TUsuario.Create(dmFinancialControl.Connection);
+    User := TUsuario.Create(dmFinancialControl.Conexao);
     qryAux := TFDQuery.Create(nil);
 
     qryAux := User.ListarUsuario(Erro);
@@ -309,9 +388,9 @@ begin
   FrmLogin.Close;
 end;
 
-procedure TFrmLogin.TrataErroCamera(Sender: TObject);
+procedure TFrmLogin.TrataPermissao(Sender: TObject);
 begin
-  ShowMessage('Você não possui permissão de acesso para esse recurso.')
+  ShowMessage('Você não possui permissão de acesso para esse recurso.');
 end;
 
 end.

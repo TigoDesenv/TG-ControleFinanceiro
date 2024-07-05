@@ -133,7 +133,7 @@ begin
   begin
     try
       rect_Delete.Visible := True;
-      Cat := TCategoria.Create(dmFinancialControl.Connection);
+      Cat := TCategoria.Create(dmFinancialControl.Conexao);
       Cat.ID_CATEGORIA := Id_Cat;
 
       Qry := cat.ListarCategoria(erro);
@@ -175,7 +175,7 @@ begin
       if AResult = mrYes then
       begin
         try
-          Cat := TCategoria.Create(dmFinancialControl.Connection);
+          Cat := TCategoria.Create(dmFinancialControl.Conexao);
           Cat.ID_CATEGORIA := Id_Cat;
 
 //        Cat.Excluir(Erro);
@@ -202,7 +202,7 @@ var
 begin
 
   try
-    Cat := TCategoria.Create(dmFinancialControl.Connection);
+    Cat := TCategoria.Create(dmFinancialControl.Conexao);
     Cat.DESCRICAO := edt_DescricaoCategoria.Text;
     Cat.ICONE := icone_selecionado;
     Cat.INDICE_ICONE := indice_selecionado;

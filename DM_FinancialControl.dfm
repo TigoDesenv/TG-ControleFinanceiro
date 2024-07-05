@@ -3,7 +3,7 @@ object dmFinancialControl: TdmFinancialControl
   OnCreate = DataModuleCreate
   Height = 409
   Width = 538
-  object Connection: TFDConnection
+  object Conexao: TFDConnection
     Params.Strings = (
       
         'Database=C:\Users\tigot\Desktop\GitHub Tiago\PUBLICO\TG-Controle' +

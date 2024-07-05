@@ -14,7 +14,11 @@ uses
   cLancamento in 'Classes\cLancamento.pas',
   uFormat in 'Units Auxiliares\uFormat.pas',
   uPermissions in 'Units Auxiliares\uPermissions.pas',
-  cUsuario in 'Classes\cUsuario.pas';
+  cUsuario in 'Classes\cUsuario.pas',
+  UnitComboCategoria in 'Units Auxiliares\UnitComboCategoria.pas' {frmComboCategoria},
+  CF_View_LancamentosResumo in 'CF_View_LancamentosResumo.pas' {FrmLancamentosResumo},
+  uFuncoesTeclado in 'Units Auxiliares\uFuncoesTeclado.pas',
+  uAlterarImagem in 'uAlterarImagem.pas' {FrmAlteraImagem};
 
 {$R *.res}
 

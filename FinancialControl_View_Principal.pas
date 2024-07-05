@@ -8,6 +8,7 @@ uses
   System.UITypes,
   System.Classes,
   System.Variants,
+  DateUtils,
   FMX.Types,
   FMX.Controls,
   FMX.Forms,
@@ -36,21 +37,21 @@ type
   TFrmPrincipal = class(TForm)
     Layout1: TLayout;
     img_menu: TImage;
-    Circle1: TCircle;
+    c_Icone: TCircle;
     Image1: TImage;
     Label1: TLabel;
     Layout2: TLayout;
-    Label2: TLabel;
+    lbl_Saldo: TLabel;
     Label3: TLabel;
     Layout3: TLayout;
     Layout4: TLayout;
     Layout5: TLayout;
     Image2: TImage;
-    Label4: TLabel;
+    lbl_Receitas: TLabel;
     Label5: TLabel;
     Layout6: TLayout;
     Image3: TImage;
-    Label6: TLabel;
+    lbl_Despesas: TLabel;
     Label7: TLabel;
     Rectangle1: TRectangle;
     ImgAdd: TImage;
@@ -88,8 +89,12 @@ type
     procedure imgFecharMenuClick(Sender: TObject);
     procedure LayoutMenuCategoriaClick(Sender: TObject);
     procedure LayoutMenuLogoffClick(Sender: TObject);
+    procedure c_IconeClick(Sender: TObject);
   private
     { Private declarations }
+    procedure MontaPainelPrincipal;
+    procedure ListarUltimosLancamentos;
+
   public
     { Public declarations }
     procedure AddLancamento(List: TListView; id_lacamentos: Integer;
@@ -101,18 +106,20 @@ type
     procedure AddCategoria(listview: TListView; id_categoria: Integer; categoria: string;
               foto: TStream);
     procedure SetupCategoria(lv: TListView; Item: TListViewItem);
-    procedure ListarUltimosLancamentos;
+    procedure CarregaIcone;
   end;
 
 var
   FrmPrincipal: TFrmPrincipal;
+  AlterandoFotoLogin: Boolean;
 
 implementation
 
 {$R *.fmx}
 
 uses
-  FinancialControl_View_Login;
+  FinancialControl_View_Login,
+  uAlterarImagem;
 
 procedure TFrmPrincipal.AddCategoria(listview: TListView; id_categoria: Integer;
   categoria: string; foto: TStream);
@@ -186,6 +193,45 @@ begin
   LayoutPrincipal.Margins.Right := -260 - rectMenu.Margins.Left;
 end;
 
+procedure TFrmPrincipal.CarregaIcone;
+var
+  User : TUsuario;
+  qryAux: TFDQuery;
+  Erro: string;
+  Foto: TStream;
+begin
+  try
+    User := TUsuario.Create(dmFinancialControl.Conexao);
+    qryAux := User.ListarUsuario(Erro);
+
+    if qryAux.FieldByName('FOTO').AsString <> '' then
+      Foto := qryAux.CreateBlobStream(qryAux.FieldByName('FOTO'), TBlobStreamMode.bmRead)
+    else
+      Foto := nil;
+
+    if Foto <> nil then
+    begin
+      c_Icone.Fill.Bitmap.Bitmap.LoadFromStream(foto);
+      Foto.DisposeOf;
+    end;
+
+  finally
+    qryAux.DisposeOf;
+    User.DisposeOf;
+  end;
+end;
+
+procedure TFrmPrincipal.c_IconeClick(Sender: TObject);
+begin
+  AlterandoFotoLogin := True;
+
+  if not Assigned(FrmLogin) then
+  begin
+    Application.CreateForm(TFrmLogin, FrmLogin);
+    FrmLogin.Show;
+  end;
+end;
+
 procedure TFrmPrincipal.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   if Assigned(FrmLancamentos) then
@@ -193,6 +239,9 @@ begin
     FrmLancamentos.DisposeOf;
     FrmLancamentos := nil;
   end;
+
+  Action := TCloseAction.caFree;
+  FrmPrincipal := nil;
 end;
 
 procedure TFrmPrincipal.FormCreate(Sender: TObject);
@@ -200,28 +249,27 @@ begin
   rectMenu.Margins.Left := - 260;
   rectMenu.Align := TAlignLayout.Left;
   rectMenu.Visible := True;
+  AlterandoFotoLogin := False;
 end;
 
 procedure TFrmPrincipal.FormShow(Sender: TObject);
 begin
   ListarUltimosLancamentos;
+  CarregaIcone;
 end;
 
 procedure TFrmPrincipal.ImgAddClick(Sender: TObject);
-var
-  Foto: TStream;
 begin
   if not Assigned(frmCadLancamentos) then
     Application.CreateForm(TFrmCadLancamentos, FrmCadLancamentos);
 
   FrmCadLancamentos.Modo := 'I';
   FrmCadLancamentos.Id_Lanc := -1;
-  FrmCadLancamentos.Show;
 
   FrmCadLancamentos.ShowModal(procedure(ModalResult: TModalResult)
                               begin
                                 ListarUltimosLancamentos;
-                               end);
+                              end);
 end;
 
 procedure TFrmPrincipal.imgFecharMenuClick(Sender: TObject);
@@ -246,22 +294,23 @@ end;
 procedure TFrmPrincipal.LayoutMenuLogoffClick(Sender: TObject);
 var
   User : TUsuario;
-    erro : string;
+  Erro : string;
 begin
   try
-    User := TUsuario.Create(dmFinancialControl.Connection);
+    User := TUsuario.Create(dmFinancialControl.Conexao);
 
-    if not User.Logout(erro) then
+    if not User.Logout(Erro) then
     begin
-      showmessage(erro);
-      exit;
+      Showmessage(Erro);
+      Exit;
     end;
 
+    AlterandoFotoLogin := False;
   finally
     User.DisposeOf;
   end;
 
-  if NOT Assigned(FrmLogin) then
+  if not Assigned(FrmLogin) then
     Application.CreateForm(TFrmLogin, FrmLogin);
 
   Application.MainForm := FrmLogin;
@@ -280,14 +329,14 @@ end;
 procedure TFrmPrincipal.ListarUltimosLancamentos;
 var
   Foto: TStream;
-  xLancamento: TLancamento;
+  Lancamento: TLancamento;
   qryAux: TFDQuery;
   Erro: String;
 begin
   try
     FrmPrincipal.lvlancamento.Items.Clear;
-    xLancamento := TLancamento.Create(dmFinancialControl.Connection);
-    qryAux := xLancamento.ListarLancamento(10, Erro);
+    Lancamento := TLancamento.Create(dmFinancialControl.Conexao);
+    qryAux := Lancamento.ListarLancamento(10, Erro);
 
     if Erro <> '' then
     begin
@@ -295,7 +344,7 @@ begin
       Exit;
     end;
 
-    qryAux.First;
+//    qryAux.First;
     while not qryAux.Eof do
     begin
       if qryAux.FieldByName('ICONE').AsString <> '' then
@@ -316,8 +365,10 @@ begin
     end;
 
   finally
-    xLancamento.DisposeOf;
+    Lancamento.DisposeOf;
   end;
+
+  MontaPainelPrincipal;
 end;
 
 procedure TFrmPrincipal.lvLancamentoItemClick(const Sender: TObject;
@@ -373,23 +424,48 @@ end;
 
 procedure TFrmPrincipal.lvLancamentoUpdateObjects(const Sender: TObject;
   const AItem: TListViewItem);
-var
-  Txt, Txt1: TListItemText;
-  Img: TListItemImage;
 begin
-  // Exemplo utilizando Variável
-  Txt := TListItemText(AItem.Objects.FindDrawable('TxtDescricao'));
-  Txt.Width := lvLancamento.Width - Txt.PlaceOffset.X - 90;
+  SetupLancamento(FrmPrincipal.lvlancamento, AItem);
+end;
 
-  // Exemplo de Resposividade(Ajuste das descricções do ListView
-  Img := TListItemImage(AItem.Objects.FindDrawable('ImgIcone'));
-  Txt1 := TListItemText(AItem.Objects.FindDrawable('TxtCategoria'));
+procedure TFrmPrincipal.MontaPainelPrincipal;
+var
+  Lanc: TLancamento;
+  qryAux: TFDQuery;
+  Erro: String;
+  ValorReceita, ValorDespesa: Double;
+begin
+  try
+    Lanc := TLancamento.Create(dmFinancialControl.Conexao);
+    Lanc.DATA_DE := FormatDateTime('YYYY-MM-DD', StartOfTheMonth(date));
+    Lanc.DATA_ATE := FormatDateTime('YYYY-MM-DD', EndOfTheMonth(date));
+    qryAux := Lanc.ListarLancamento(0, Erro);
 
-  if lvLancamento.Width < 150 then
-  begin
-    Img.Visible := False;
-    Txt.PlaceOffset.X := 5;
-    Txt1.PlaceOffset.X := 5;
+    if Erro <> '' then
+    begin
+      Showmessage(erro);
+      Exit;
+    end;
+
+    ValorReceita := 0;
+    ValorDespesa := 0;
+
+    while not qryAux.Eof do
+    begin
+      if qryAux.FieldByName('VALOR').AsFloat > 0 then
+        ValorReceita := ValorReceita + qryAux.FieldByName('VALOR').AsFloat
+      else
+        ValorDespesa := ValorDespesa + qryAux.FieldByName('VALOR').AsFloat;
+
+      qryAux.Next;
+    end;
+
+    lbl_receitas.Text := FormatFloat('#,##0.00', ValorReceita);
+    lbl_despesas.Text := FormatFloat('#,##0.00', ValorDespesa);
+    lbl_saldo.Text := FormatFloat('#,##0.00', ValorReceita + ValorDespesa); // Somamos pq o vl_desp já esta negativo...
+  finally
+    Lanc.DisposeOf;
+    qryAux.DisposeOf;
   end;
 end;
 

@@ -102,7 +102,7 @@ begin
   try
     lv_categoria.Items.Clear;
 
-    Cat := TCategoria.Create(dmFinancialControl.Connection);
+    Cat := TCategoria.Create(dmFinancialControl.Conexao);
     Qry := cat.ListarCategoria(erro);
 
     Qry.First;

@@ -30,6 +30,15 @@ uses
   FireDAC.DApt,
   Data.DB;
 
+{$IFDEF AUTOREFCOUNT}
+type
+  TIntegerWrapper = class
+    public
+      Value: Integer;
+      constructor Create(AValue: Integer);
+end;
+{$ENDIF}
+
 type
   TFrmCadLancamentos = class(TForm)
     Layout1: TLayout;
@@ -57,7 +66,8 @@ type
     imgDespesa: TImage;
     ImgReceita: TImage;
     img_save: TImage;
-    cmb_categoria: TComboBox;
+    lbl_Categoria: TLabel;
+    Image1: TImage;
     procedure img_voltarClick(Sender: TObject);
     procedure ImgTipoLancamentoClick(Sender: TObject);
     procedure img_saveClick(Sender: TObject);
@@ -66,9 +76,10 @@ type
     procedure FormShow(Sender: TObject);
     procedure edt_ValorLancTyping(Sender: TObject);
     procedure imgExcluirClick(Sender: TObject);
+    procedure lbl_CategoriaClick(Sender: TObject);
   private
     { Private declarations }
-    procedure ComboCategoria;
+//    procedure ComboCategoria;
     function TrataValor(str: string): double;
   public
     { Public declarations }
@@ -84,39 +95,54 @@ implementation
 {$R *.fmx}
 
 uses
-  FinancialControl_View_Principal;
+  FinancialControl_View_Principal,
+  UnitComboCategoria;
 
-procedure TFrmCadLancamentos.ComboCategoria;
-var
-  Categoria : TCategoria;
-  Erro : string;
-  qryAux: TFDQuery;
+{$IFDEF AUTOREFCOUNT}
+constructor TIntegerWrapper.Create(AValue: Integer);
 begin
-  try
-    cmb_categoria.Items.Clear;
-
-    Categoria := TCategoria.Create(dmFinancialControl.Connection);
-    qryAux := Categoria.ListarCategoria(Erro);
-
-    if Erro <> '' then
-    begin
-      Showmessage(Erro);
-      Exit;
-    end;
-
-    while not qryAux.Eof do
-    begin
-      cmb_categoria.Items.AddObject(qryAux.FieldByName('DESCRICAO').AsString,
-                                    TObject(qryAux.FieldByName('ID_CATEGORIA').AsInteger));
-
-      qryAux.Next;
-    end;
-
-  finally
-    qryAux.DisposeOf;
-    Categoria.DisposeOf;
-  end;
+  inherited Create;
+  Value := AValue;
 end;
+{$ENDIF}
+
+//procedure TFrmCadLancamentos.ComboCategoria;
+//var
+//  Categoria : TCategoria;
+//  Erro : string;
+//  qryAux: TFDQuery;
+//begin
+//  try
+//    cmb_categoria.Items.Clear;
+//
+//    Categoria := TCategoria.Create(dmFinancialControl.Connection);
+//    qryAux := Categoria.ListarCategoria(Erro);
+//
+//    if Erro <> '' then
+//    begin
+//      Showmessage(Erro);
+//      Exit;
+//    end;
+//
+//    while not qryAux.Eof do
+//    begin
+////      cmb_categoria.Items.AddObject(qryAux.FieldByName('DESCRICAO').AsString,
+////                                    TObject(qryAux.FieldByName('ID_CATEGORIA').AsInteger));
+//        cmb_categoria.Items.AddObject(qryAux.FieldByName('DESCRICAO').AsString,
+//
+//        {$IFDEF AUTOREFCOUNT}
+//          TIntegerWrapper.Create(qry.FieldByName('ID_CATEGORIA').AsInteger)
+//        {$ELSE}
+//          TObject(qryAux.FieldByName('ID_CATEGORIA').AsInteger);
+//        {$ENDIF});
+//      qryAux.Next;
+//    end;
+//
+//  finally
+//    qryAux.DisposeOf;
+//    Categoria.DisposeOf;
+//  end;
+//end;
 
 procedure TFrmCadLancamentos.edt_ValorLancTyping(Sender: TObject);
 begin
@@ -129,7 +155,7 @@ var
     qryAux: TFDQuery;
     Erro : string;
 begin
-  ComboCategoria;
+//  ComboCategoria;
 
   if modo = 'I' then
   begin
@@ -139,11 +165,13 @@ begin
       ImgTipoLancamento.Bitmap := imgDespesa.Bitmap;
       ImgTipoLancamento.Tag := -1;
       rectDelete.Visible := False;
+      lbl_Categoria.Text := '';
+      lbl_Categoria.Tag := 0;
   end
   else
   begin
     try
-      Lanc := TLancamento.Create(dmFinancialControl.Connection);
+      Lanc := TLancamento.Create(dmFinancialControl.Conexao);
       Lanc.ID_LANCAMENTO := id_lanc;
       qryAux := Lanc.ListarLancamento(0, erro);
 
@@ -169,7 +197,9 @@ begin
         ImgTipoLancamento.Tag := 1;
       end;
 
-      cmb_categoria.ItemIndex := cmb_categoria.Items.IndexOf(qryAux.FieldByName('DESCRICAO_CATEGORIA').AsString);
+//      cmb_categoria.ItemIndex := cmb_categoria.Items.IndexOf(qryAux.FieldByName('DESCRICAO_CATEGORIA').AsString);
+      lbl_Categoria.Text := qryAux.FieldByName('DESCRICAO_CATEGORIA').AsString;
+      lbl_Categoria.Tag := qryAux.FieldByName('ID_CATEGORIA').AsInteger;
       rectDelete.Visible := True;
 
     finally
@@ -206,13 +236,7 @@ end;
 procedure TFrmCadLancamentos.imgExcluirClick(Sender: TObject);
 var
   Lanc: TLancamento;
-  Erro : string;
 begin
-
-
-  Lanc.Excluir(erro);
-  FrmCadLancamentos.Close;
-
   TDialogService.MessageDialog('Confirma Exclusão do Lançamento?',
     TMsgDlgType.mtConfirmation,
     [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo],
@@ -225,7 +249,7 @@ begin
       if AResult = mrYes then
       begin
         try
-          Lanc := TLancamento.Create(dmFinancialControl.Connection);
+          Lanc := TLancamento.Create(dmFinancialControl.Conexao);
           Lanc.ID_LANCAMENTO := Id_Lanc;
 
           if not Lanc.Excluir(Erro) then
@@ -248,10 +272,17 @@ var
   erro : string;
 begin
   try
-    Lanc := TLancamento.Create(dmFinancialControl.Connection);
+    Lanc := TLancamento.Create(dmFinancialControl.Conexao);
     Lanc.DESCRICAO := edt_DescricaoLanc.Text;
     Lanc.VALOR := TrataValor(edt_ValorLanc.Text) * ImgTipoLancamento.Tag;
-    Lanc.ID_CATEGORIA := integer(cmb_categoria.Items.Objects[cmb_categoria.ItemIndex]);
+
+    {$IFDEF AUTOREFCOUNT}
+    //lanc.ID_CATEGORIA := TIntegerWrapper(cmb_categoria.Items.Objects[cmb_categoria.ItemIndex]).Value;
+    {$ELSE}
+    //lanc.ID_CATEGORIA := Integer(cmb_categoria.Items.Objects[cmb_categoria.ItemIndex]);
+    {$ENDIF}
+
+    Lanc.ID_CATEGORIA := lbl_categoria.Tag;
     Lanc.DATA_LANC := edtDataLanc.Date;
 
     if modo = 'I' then
@@ -278,6 +309,22 @@ end;
 procedure TFrmCadLancamentos.img_voltarClick(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TFrmCadLancamentos.lbl_CategoriaClick(Sender: TObject);
+begin
+  // Abre litagem categorias
+  if not Assigned(FrmComboCategoria) then
+    Application.CreateForm(TFrmComboCategoria, FrmComboCategoria);
+
+  FrmComboCategoria.ShowModal(procedure(ModalResult: TModalResult)
+  begin
+    if FrmComboCategoria.IdCategoriaSelecao > 0 then
+    begin
+      lbl_categoria.Text := FrmComboCategoria.CategoriaSelecao;
+      lbl_categoria.Tag := FrmComboCategoria.IdCategoriaSelecao;
+    end;
+  end);
 end;
 
 function TFrmCadLancamentos.TrataValor(str: string): double;

@@ -12,7 +12,7 @@ uses
 
 type
   TdmFinancialControl = class(TDataModule)
-    Connection: TFDConnection;
+    Conexao: TFDConnection;
     procedure DataModuleCreate(Sender: TObject);
   private
     { Private declarations }
@@ -31,7 +31,7 @@ implementation
 
 procedure TdmFinancialControl.DataModuleCreate(Sender: TObject);
 begin
-  with Connection do
+  with Conexao do
   begin
     {$IFDEF MSWINDOWS}
     try

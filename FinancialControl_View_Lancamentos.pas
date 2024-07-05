@@ -48,6 +48,7 @@ type
     Label7: TLabel;
     ImgAdd: TImage;
     lvlancamento: TListView;
+    img_resumo: TImage;
     procedure img_voltarClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
@@ -58,16 +59,16 @@ type
     procedure ImgMesAnteriorClick(Sender: TObject);
     procedure lvlancamentoItemClick(const Sender: TObject;
       const AItem: TListViewItem);
+    procedure img_resumoClick(Sender: TObject);
   private
     DataFiltro: TDate;
     procedure MostrarLancamentos(id_lancamento: Integer);
-//    procedure ListarLancamentosPeriodo;
+    procedure ListarLancamentosPeriodo;
     procedure NavegarMes(num_mes: integer);
     function NomeMes: string;
     { Private declarations }
   public
     { Public declarations }
-    procedure ListarLancamentosPeriodo;
   end;
 
 var
@@ -79,7 +80,8 @@ implementation
 
 uses
   FinancialControl_View_Principal,
-  FinancialControl_View_Cad_Lancamentos;
+  FinancialControl_View_Cad_Lancamentos,
+  CF_View_LancamentosResumo;
 
 procedure TFrmLancamentos.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
@@ -108,6 +110,16 @@ begin
   NavegarMes(1);
 end;
 
+procedure TFrmLancamentos.img_resumoClick(Sender: TObject);
+begin
+  if not Assigned(FrmLancamentosResumo) then
+    Application.CreateForm(TFrmLancamentosResumo, FrmLancamentosResumo);
+
+  FrmLancamentosResumo.lbl_mes.Text := FrmLancamentos.lbl_mes.Text;
+  FrmLancamentosResumo.DataFiltro := FrmLancamentos.DataFiltro;
+  FrmLancamentosResumo.Show;
+end;
+
 procedure TFrmLancamentos.img_voltarClick(Sender: TObject);
 begin
   close;
@@ -127,7 +139,7 @@ begin
     ValorReceita := 0;
     ValorDespesa := 0;
 
-    xLancamento := TLancamento.Create(dmFinancialControl.Connection);
+    xLancamento := TLancamento.Create(dmFinancialControl.Conexao);
     xLancamento.DATA_DE := FormatDateTime('YYYY-MM-DD', StartOfTheMonth(DataFiltro));
     xLancamento.DATA_ATE := FormatDateTime('YYYY-MM-DD', EndOfTheMonth(DataFiltro));
     qryAux := xLancamento.ListarLancamento(0, Erro);

@@ -30,6 +30,7 @@ type
     property DESCRICAO: string read FDESCRICAO write FDESCRICAO;
 
     function ListarLancamento(qtd_result: Integer; out erro: string): TFDQuery;
+    function ListarResumo(out erro: string): TFDQuery;
     function Inserir(out erro: string): Boolean;
     function Alterar(out erro: string): Boolean;
     function Excluir(out erro: string): Boolean;
@@ -255,6 +256,38 @@ begin
       Result := nil;
       erro := 'Erro ao consultar categorias: ' + ex.Message;
     end;
+  end;
+end;
+
+function TLancamento.ListarResumo(out Erro: string): TFDQuery;
+var
+  qryAux : TFDQuery;
+begin
+  try
+    qryAux := TFDQuery.Create(nil);
+    qryAux.Connection := FConnection;
+
+    with qryAux do
+    begin
+      Active := false;
+      sql.Clear;
+      sql.Add('SELECT C.ICONE, C.DESCRICAO, CAST(SUM(L.VALOR) AS REAL) AS VALOR');
+      sql.Add('FROM    TAB_LANCAMENTO L');
+      sql.Add('JOIN TAB_CATEGORIA C ON (C.ID_CATEGORIA = L.ID_CATEGORIA)');
+      SQL.Add('WHERE L.DATA BETWEEN ''' + DATA_DE + ''' AND ''' + DATA_ATE + '''');
+      sql.Add('GROUP BY C.ICONE, C.DESCRICAO');
+      sql.Add('ORDER BY 3');
+      Active := true;
+    end;
+
+    Result := qryAux;
+    erro := '';
+
+  except on ex:exception do
+  begin
+    Result := nil;
+    erro := 'Erro ao Consultar Resumo: ' + ex.Message;
+  end;
   end;
 end;
 

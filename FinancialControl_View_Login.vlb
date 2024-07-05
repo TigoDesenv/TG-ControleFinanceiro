@@ -64,9 +64,6 @@ Coordinates=413,214,67,36
 [Image1]
 Coordinates=424,10,57,58
 
-[RoundRect3]
-Coordinates=317,214,86,36
-
 [Label4]
 Coordinates=186,10,53,58
 
@@ -89,14 +86,8 @@ Coordinates=10,214,67,36
 [Layout3]
 Coordinates=501,146,60,36
 
-[RoundRect8]
-Coordinates=405,146,86,36
-
 [Layout7]
 Coordinates=335,146,60,36
-
-[edt_cad_email]
-Coordinates=316,10,98,58
 
 [Layout4]
 Coordinates=265,146,60,36
@@ -114,7 +105,7 @@ Coordinates=10,10,99,58
 Coordinates=491,10,109,58
 
 []
-Coordinates=119,10,57,58
+Coordinates=316,10,98,58
 
 [rectContaProximo]
 Coordinates=490,214,86,36
@@ -130,4 +121,10 @@ Coordinates=73,78,57,58
 
 [imgFotoGaleria]
 Coordinates=252,78,57,58
+
+[rectLogin]
+Coordinates=317,214,86,36
+
+[rectConta]
+Coordinates=405,146,86,36
 

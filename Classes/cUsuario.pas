@@ -11,7 +11,7 @@ uses
 type
   TUsuario = class
     private
-      Fconnection: TFDConnection;
+      Fconnect: TFDConnection;
       FEMAIL: String;
       FSENHA: String;
       FNOME: String;
@@ -33,7 +33,8 @@ type
       function Inserir(out erro: String): Boolean;
       function Alterar(out erro: String): Boolean;
       function Excluir(out erro: String): Boolean;
-      function Logout(out erro: string): boolean;
+      function Logout(out erro: string): Boolean;
+      function BuscaUsuarioLogado(out erro: string): Boolean;
   end;
 
 implementation
@@ -67,7 +68,7 @@ begin
   try
     try
       qry := TFDQuery.Create(nil);
-      qry.Connection := Fconnection;
+      qry.Connection := Fconnect;
 
       with qry do
       begin
@@ -76,6 +77,7 @@ begin
         SQL.Add('UPDATE TAB_USUARIO SET NOME = :NOME, EMAIL = :EMAIL,');
         SQL.Add('SENHA = :SENHA, IND_LOGIN = :IND_LOGIN, FOTO = :FOTO');
         SQL.Add('WHERE ID_USUARIO = :ID_USUARIO');
+        ParamByName('ID_USUARIO').Value := ID_USUARIO;
         ParamByName('NOME').Value := NOME;
         ParamByName('EMAIL').Value := EMAIL;
         ParamByName('SENHA').Value := SENHA;
@@ -98,9 +100,54 @@ begin
   end;
 end;
 
+function TUsuario.BuscaUsuarioLogado(out erro: string): Boolean;
+var
+  qryAux: TFDQuery;
+begin
+  try
+    qryAux := TFDQuery.Create(nil);
+    qryAux.Connection := Fconnect;
+    try
+      with qryAux do
+      begin
+        Active := False;
+        SQL.Clear;
+        SQL.Add('SELECT ID_USUARIO, NOME, EMAIL, SENHA, IND_LOGIN FROM TAB_USUARIO');
+        SQL.Add('WHERE IND_LOGIN = ''S''');
+        Active := True;
+
+        if qryAux.RecordCount = 0 then
+        begin
+          Result := False;
+          Erro := 'Nenhum usuário logado';
+          Exit;
+        end;
+        if qryAux.RecordCount = 1 then
+        begin
+          Result := True;
+          Erro := '';
+          ID_USUARIO := FieldByName('ID_USUARIO').Value;
+          NOME := FieldByName('NOME').Value;
+          EMAIL := FieldByName('EMAIL').Value;
+          SENHA := FieldByName('SENHA').Value;
+          IND_LOGIN := FieldByName('IND_LOGIN').Value;
+        end;
+      end;
+
+    except on ex:exception do
+    begin
+      Result := False;
+      Erro := 'Erro ao Buscar Usuário Logado: ' + ex.Message;
+    end;
+    end;
+  finally
+    qryAux.DisposeOf;
+  end;
+end;
+
 constructor TUsuario.Create(connection: TFDConnection);
 begin
-  Fconnection := connection;
+  Fconnect := connection;
 end;
 
 function TUsuario.Excluir(out erro: String): Boolean;
@@ -110,7 +157,7 @@ begin
   try
     try
       qry := TFDQuery.Create(nil);
-      qry.Connection := Fconnection;
+      qry.Connection := Fconnect;
 
    // Valida se categoria tem lancamentos
       with qry do
@@ -149,12 +196,12 @@ begin
     Exit;
   end;
 
-//  if EMAIL = '' then
-//  begin
-//    erro := 'Informe o E-mail do Usuário';
-//    Result := False;
-//    Exit;
-//  end;
+  if EMAIL = '' then
+  begin
+    erro := 'Informe o E-mail do Usuário';
+    Result := False;
+    Exit;
+  end;
 
   if SENHA = '' then
   begin
@@ -166,7 +213,7 @@ begin
   try
     try
       qry := TFDQuery.Create(nil);
-      qry.Connection := Fconnection;
+      qry.Connection := Fconnect;
 
       with qry do
       begin
@@ -202,7 +249,7 @@ var
 begin
   try
     qry := TFDQuery.Create(nil);
-    qry.Connection := Fconnection;
+    qry.Connection := Fconnect;
 
     with qry do
     begin
@@ -242,13 +289,13 @@ begin
   end;
 end;
 
-function TUsuario.Logout(out erro: string): boolean;
+function TUsuario.Logout(out erro: string): Boolean;
 var
   qryAux: TFDQuery;
 begin
   try
     qryAux := TFDQuery.Create(nil);
-    qryAux.Connection := Fconnection;
+    qryAux.Connection := Fconnect;
 
     try
       with qryAux do
@@ -270,7 +317,7 @@ begin
     end;
     end;
   finally
-      qryAux.DisposeOf;
+    qryAux.DisposeOf;
   end;
 end;
 
@@ -295,7 +342,7 @@ begin
 
   try
     qryAux := TFDQuery.Create(nil);
-    qryAux.Connection := Fconnection;
+    qryAux.Connection := Fconnect;
     try
       with qryAux do
       begin
@@ -333,7 +380,6 @@ begin
   finally
     qryAux.DisposeOf;
   end;
-
 end;
 
 end.

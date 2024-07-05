@@ -2,7 +2,10 @@ unit uPermissions;
 
 interface
 
-uses System.Permissions, FMX.DialogService, FMX.MediaLibrary.Actions
+uses
+  System.Permissions,
+  FMX.DialogService,
+  FMX.MediaLibrary.Actions
 
 {$IFDEF ANDROID}
     , Androidapi.Helpers, Androidapi.JNI.JavaTypes, Androidapi.JNI.Os
