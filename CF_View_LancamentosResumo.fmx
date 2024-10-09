@@ -168,22 +168,22 @@ object FrmLancamentosResumo: TFrmLancamentosResumo
       item
         AppearanceObjectName = 'TxtCategoria'
         AppearanceClassName = 'TTextObjectAppearance'
-        Appearance.Font.Size = 14.000000000000000000
+        Appearance.Font.Size = 13.000000000000000000
         Appearance.TextAlign = Leading
         Appearance.TextColor = xFFBEBEBE
         Appearance.Width = 200.000000000000000000
-        Appearance.Height = 20.000000000000000000
+        Appearance.Height = 22.000000000000000000
         Appearance.PlaceOffset.X = 57.000000000000000000
         Appearance.PlaceOffset.Y = 21.000000000000000000
       end
       item
         AppearanceObjectName = 'TxtValor'
         AppearanceClassName = 'TTextObjectAppearance'
-        Appearance.Font.Size = 14.000000000000000000
+        Appearance.Font.Size = 13.000000000000000000
         Appearance.TextAlign = Trailing
         Appearance.TextColor = xFFBEBEBE
         Appearance.Width = 81.000000000000000000
-        Appearance.Height = 17.000000000000000000
+        Appearance.Height = 22.000000000000000000
         Appearance.Align = Trailing
         Appearance.PlaceOffset.X = -4.000000000000000000
         Appearance.PlaceOffset.Y = 21.000000000000000000
